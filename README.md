@@ -1,6 +1,9 @@
 # CommonApi
 A small utility library i made while working on my game
 
+## Requirements
+- C++20 or higher
+
 ## Dependencies
 This project uses a third-party library:
 
