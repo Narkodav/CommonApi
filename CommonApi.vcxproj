@@ -56,6 +56,9 @@
     <ClInclude Include="include\Utilities\ArrayNd.h" />
     <ClInclude Include="include\Utilities\BinPacker.h" />
     <ClInclude Include="include\Utilities\Functions.h" />
+    <ClInclude Include="include\Utilities\GridContext.h" />
+    <ClInclude Include="include\Utilities\PathFinder.h" />
+    <ClInclude Include="include\Utilities\PathFinderContext.h" />
     <ClInclude Include="include\Utilities\RollingWindow.h" />
     <ClInclude Include="include\Utilities\SampleTracker.h" />
     <ClInclude Include="include\Utilities\SortedVector.h" />
