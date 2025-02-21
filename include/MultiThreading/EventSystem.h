@@ -13,6 +13,7 @@ namespace MultiThreading
 
 	class EventSystem
 	{
+	public:
 		using EventEnum = Policy::Enum;
 
 		template<EventEnum E>
@@ -26,7 +27,7 @@ namespace MultiThreading
 
 		using SunscriberMap = Synchronized<std::unordered_map<EventEnum, std::any>>;
 
-	public:
+	
 		class Subscription
 		{
 			using EventEnum = Policy::Enum;
