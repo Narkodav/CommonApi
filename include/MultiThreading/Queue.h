@@ -18,6 +18,34 @@ namespace MultiThreading
     public:
         Queue() = default;
 
+        Queue(Queue&& other) noexcept {
+            std::lock_guard<std::mutex> lock(other.mutex);
+            deque = std::exchange(other.deque, std::queue<T>());
+        }
+
+        Queue& operator=(Queue&& other) noexcept {
+            if (this != &other) {
+                std::scoped_lock locks(mutex, other.mutex);
+                deque = std::exchange(other.deque, std::queue<T>());
+            }
+            return *this;
+        }
+
+        Queue(const Queue& other)
+        {
+            std::lock_guard<std::mutex> lockOther(other.mutex);
+            queue = other.queue;
+        }
+
+        Queue& operator=(const Queue& other)
+        {
+            if (this != &other) {
+                std::scoped_lock locks(mutex, other.mutex);
+                queue = other.queue;
+            }
+            return *this;
+        }
+
         // Push an item to the queue
         void push(T value) {
             std::lock_guard<std::mutex> lock(mutex);

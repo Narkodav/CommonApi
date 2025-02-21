@@ -16,6 +16,36 @@ namespace MultiThreading
     public:
         Vector() = default;
 
+        Vector(Vector&& other) noexcept {
+            std::lock_guard<std::mutex> lock(other.m_mutex);
+            m_vector = std::move(other.m_vector);
+            other.m_vector.clear();
+        }
+
+        Vector& operator=(Vector&& other) noexcept {
+            if (this != &other) {
+                std::scoped_lock locks(m_mutex, other.m_mutex);
+                m_vector = std::move(other.m_vector);
+                other.m_vector.clear();
+            }
+            return *this;
+        }
+
+        Vector(const Vector& other)
+        {
+            std::lock_guard<std::mutex> lockOther(other.m_mutex);
+            m_vector = other.m_vector;
+        }
+
+        Vector& operator=(const Vector& other)
+        {
+            if (this != &other) {
+                std::scoped_lock locks(m_mutex, other.m_mutex);
+                m_vector = other.m_vector;
+            }
+            return *this;
+        }
+
         // Add element
         void pushBack(const T& value) {
             std::lock_guard<std::mutex> lock(m_mutex);

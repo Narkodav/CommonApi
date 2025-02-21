@@ -19,6 +19,35 @@ namespace MultiThreading
     public:
         Deque() = default;
 
+        Deque(Deque&& other) noexcept {
+            std::lock_guard<std::mutex> lock(other.mutex);
+            deque = std::exchange(other.deque, std::deque<T>());
+        }
+
+        Deque& operator=(Deque&& other) noexcept {
+            if (this != &other) {
+                std::scoped_lock locks(mutex, other.mutex);
+                deque = std::exchange(other.deque, std::deque<T>());
+            }
+            return *this;
+        }
+
+        Deque(const Deque& other)
+        {
+            std::lock_guard<std::mutex> lockOther(other.mutex);
+            deque = other.deque;
+        }
+
+        Deque& operator=(const Deque& other)
+        {
+            if (this != &other) {
+                std::scoped_lock locks(mutex, other.mutex);
+                deque = other.deque;
+            }
+            return *this;
+        }
+
+
         void pushBack(T value) {
             std::lock_guard<std::mutex> lock(mutex);
             deque.push_back(std::move(value));
@@ -69,12 +98,12 @@ namespace MultiThreading
             std::unique_lock<std::mutex> lock(mutex);
 
             if (!deque.empty()) {
-                value = std::move(deque.front());
+                value = std::move(deque.back());
                 deque.pop_back();
             }
 
             notEmpty.wait(lock, [this]() { return !deque.empty(); });
-            value = std::move(deque.front());
+            value = std::move(deque.back());
             deque.pop_back();
         }
 
@@ -102,14 +131,14 @@ namespace MultiThreading
             std::unique_lock<std::mutex> lock(mutex);
 
             if (!deque.empty()) {
-                value = std::move(deque.front());
+                value = std::move(deque.back());
                 deque.pop_back();
                 return true;
             }
 
             if (notEmpty.wait_for(lock, timeout, [this]() { return !deque.empty(); }))
             {
-                value = std::move(deque.front());
+                value = std::move(deque.back());
                 deque.pop_back();
                 return true;
             }

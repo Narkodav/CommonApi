@@ -37,6 +37,7 @@ namespace MultiThreading
 		while (1)
 		{
 			m_freeWorkers++;
+			m_poolFinished.notify_one();
 			if (!m_activeFlags[threadIndex] || !m_active.load()) {
 #ifdef _DEBUG
 				logThreadState("exiting");
@@ -72,12 +73,10 @@ namespace MultiThreading
 
 	void ThreadPool::shutdown() //safely exits
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
+		auto lock = waitForAllAndPause();
 		m_active.store(0);
 		if (!m_workerThreads.size())
 			return;
-
-		waitForAll();
 
 		for (size_t i = 0; i < m_workerThreads.size(); i++) {
 			m_activeFlags[i] = false;
@@ -108,6 +107,7 @@ namespace MultiThreading
 		std::lock_guard<std::mutex> lock(m_mutex);
 		if (!m_active.load())
 			return;
+
 #ifdef _DEBUG
 		auto wrappedTask = [this, task]() {
 			auto threadId = std::this_thread::get_id();
