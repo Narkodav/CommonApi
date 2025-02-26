@@ -12,11 +12,15 @@
 #include <functional>
 #include <iostream>
 #include <utility>
+#include <type_traits>
 
 namespace MultiThreading
 {
 	class ThreadPool
 	{
+	public:
+		static const unsigned int THREAD_POOL_MAX_THREADS;
+
 	private:
 #ifdef _DEBUG
 		struct ThreadInfo {
@@ -32,13 +36,14 @@ namespace MultiThreading
 #endif
 
 		std::vector<std::thread> m_workerThreads;
-		std::atomic<unsigned int> m_freeWorkers;
+		std::atomic<unsigned int> m_workerCount = 0;
+		std::atomic<unsigned int> m_freeWorkers = 0;
 		std::atomic<unsigned int> m_activeWorkers = 0;
 		std::atomic<unsigned int> m_exited = 0;
 		Deque<std::function<void()>> m_tasks;
 		Vector<bool> m_activeFlags;
 		std::atomic<bool> m_active = 0;
-		std::mutex m_mutex;
+		std::mutex m_taskSubmissionMutex;
 		std::condition_variable_any m_poolFinished;
 
 		void workerLoop(size_t threadIndex);
@@ -46,7 +51,7 @@ namespace MultiThreading
 	public:
 		ThreadPool() = default;
 		ThreadPool(int numThreads) { init(numThreads); };
-		~ThreadPool();
+		~ThreadPool() { shutdown(); };
 
 		ThreadPool(const ThreadPool&) = delete;
 		ThreadPool& operator=(const ThreadPool&) = delete;
@@ -116,96 +121,144 @@ namespace MultiThreading
 		void shutdown();
 		void terminate();
 
-		void pushTask(std::function<void()> task);
+		bool pushTask(std::function<void()> task) {
+			if (!m_active.load())
+				return false;
+			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
+			pushTask(task, lock);
+			return true;
+		};
 
 		// Vector of tasks with move semantics
-		void pushTasks(std::vector<std::function<void()>>&& tasks) {
-			std::lock_guard<std::mutex> lock(m_mutex);
+		bool pushTasks(std::vector<std::function<void()>>&& tasks) {
+			if (!m_active.load())
+				return false;
+			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
 			for (auto& task : tasks)
-				pushTask(std::move(task));
+				pushTask(std::move(task), lock);
+			return true;
 		}
 
 		// Const reference vector version
-		void pushTasks(const std::vector<std::function<void()>>& tasks) {
-			std::lock_guard<std::mutex> lock(m_mutex);
+		bool pushTasks(const std::vector<std::function<void()>>& tasks) {
+			if (!m_active.load())
+				return false;
+			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
 			for (const auto& task : tasks)
-				pushTask(task);
+				pushTask(task, lock);
+			return true;
 		}
 
-		// Iterator range version
-		template<typename Iterator>
-		void pushTasks(Iterator begin, Iterator end) {
-			static_assert(std::is_convertible_v<
-				typename std::iterator_traits<Iterator>::value_type,
-				std::function<void()>
-			>, "Iterator must point to compatible task type");
-			std::lock_guard<std::mutex> lock(m_mutex);
-			for (auto it = begin; it != end; ++it) {
-				pushTask(*it);
-			}
-		}
+		// implementation doesn't work, commented out for now
+		//// Iterator range version
+		//template<typename Iterator>
+		//bool pushTasks(Iterator begin, Iterator end) {
+		//	// Use std::decay_t to get the actual value type from the iterator
+		//	//using ValueType = typename std::decay_t<decltype(*std::declval<Iterator>())>;
 
-		// Variadic template for multiple individual tasks
-		template<typename... Tasks>
-		void pushTasks(Tasks&&... tasks) {
-			static_assert((std::is_convertible_v<Tasks, std::function<void()>> && ...),
-				"All tasks must be convertible to std::function<void()>");
-			std::lock_guard<std::mutex> lock(m_mutex);
-			(pushTask(std::forward<Tasks>(tasks)), ...);
-		}
+		//	//static_assert(std::is_convertible_v<
+		//	//	ValueType,
+		//	//	std::function<void()>
+		//	//>, "Iterator must point to compatible task type");
 
-		void pushPriorityTask(std::function<void()> task);
+		//	if (!m_active.load())
+		//		return false;
+		//	std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
+		//	for (auto it = begin; it != end; ++it) {
+		//		std::function<void()> task = *it; // Will fail to compile if not convertible
+		//		pushTask(std::move(task), lock);
+		//	}
+		//	return true;
+		//}
+
+		//// Variadic template for multiple individual tasks
+		//template<typename... Tasks>
+		//bool pushTasks(Tasks&&... tasks) {
+		//	if (!m_active.load())
+		//		return false;
+
+		//	//static_assert((std::is_convertible_v<
+		//	//	std::decay_t<Tasks>,
+		//	//	std::function<void()>
+		//	//> && ...), "All tasks must be convertible to std::function<void()>");
+
+		//	std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
+		//	(pushTask(std::function<void()>(std::forward<Tasks>(tasks)), lock), ...);
+		//	return true;
+		//}
+
+		bool pushPriorityTask(std::function<void()> task) {
+			if (!m_active.load())
+				return false;
+			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
+			pushPriorityTask(task, lock);
+			return true;
+		};
 
 		// Vector of tasks with move semantics
-		void pushPriorityTasks(std::vector<std::function<void()>>&& tasks) {
-			std::lock_guard<std::mutex> lock(m_mutex);
+		bool pushPriorityTasks(std::vector<std::function<void()>>&& tasks) {
+			if (!m_active.load())
+				return false;
+			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
 			for (auto& task : tasks)
-				pushPriorityTask(std::move(task));
+				pushPriorityTask(std::move(task), lock);
+			return true;
 		}
 
 		// Const reference vector version
-		void pushPriorityTasks(const std::vector<std::function<void()>>& tasks) {
-			std::lock_guard<std::mutex> lock(m_mutex);
+		bool pushPriorityTasks(const std::vector<std::function<void()>>& tasks) {
+			if (!m_active.load())
+				return false;
+			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
 			for (const auto& task : tasks)
-				pushPriorityTask(task);
+				pushPriorityTask(task, lock);
+			return true;
 		}
 
-		// Iterator range version
-		template<typename Iterator>
-		void pushPriorityTasks(Iterator begin, Iterator end) {
-			static_assert(std::is_convertible_v<
-				typename std::iterator_traits<Iterator>::value_type,
-				std::function<void()>
-			>, "Iterator must point to compatible task type");
-			std::lock_guard<std::mutex> lock(m_mutex);
-			for (auto it = begin; it != end; ++it) {
-				pushPriorityTask(*it);
-			}
-		}
+		// implementation doesn't work, commented out for now
+		//// Iterator range version
+		//template<typename Iterator>
+		//bool pushPriorityTasks(Iterator begin, Iterator end) {
+		//	// Use std::decay_t to get the actual value type from the iterator
+		//	using ValueType = typename std::decay_t<decltype(*std::declval<Iterator>())>;
 
-		// Variadic template for multiple individual tasks
-		template<typename... Tasks>
-		void pushPriorityTasks(Tasks&&... tasks) {
-			static_assert((std::is_convertible_v<Tasks, std::function<void()>> && ...),
-				"All tasks must be convertible to std::function<void()>");
-			std::lock_guard<std::mutex> lock(m_mutex);
-			(pushPriorityTask(std::forward<Tasks>(tasks)), ...);
-		}
+		//	static_assert(std::is_convertible_v<
+		//		ValueType,
+		//		std::function<void()>
+		//	>, "Iterator must point to compatible task type");
+
+		//	if (!m_active.load())
+		//		return false;
+
+		//	std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
+		//	for (auto it = begin; it != end; ++it) {
+		//		pushPriorityTask(*it, lock);
+		//	}
+		//	return true;
+		//}
+
+		//// Variadic template for multiple individual tasks
+		//template<typename... Tasks>
+		//bool pushPriorityTasks(Tasks&&... tasks) {
+		//	if (!m_active.load())
+		//		return false;
+
+		//	static_assert((std::is_convertible_v<
+		//		std::decay_t<Tasks>,
+		//		std::function<void()>
+		//	> && ...), "All tasks must be convertible to std::function<void()>");
+
+		//	std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
+		//	(pushPriorityTask(std::forward<Tasks>(tasks), lock), ...);
+		//	return true;
+		//}
 
 		void resize(size_t newSize);
 
-		void waitForAll() {
-			std::unique_lock<std::mutex> lock(m_mutex);
-
-			m_poolFinished.wait(lock, [this]() {
-				return m_tasks.size() == 0 && m_freeWorkers == m_workerThreads.size();
-				});
-		}
-
 		// returns the lock after to pause the pool
-		// consider careful scoping management
-		std::unique_lock<std::mutex> waitForAllAndPause() {
-			std::unique_lock<std::mutex> lock(m_mutex);
+		// waits until all tasks are finished and locks off the task submission
+		std::unique_lock<std::mutex> waitForAll() {
+			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
 
 			m_poolFinished.wait(lock, [this]() {
 				return m_tasks.size() == 0 && m_freeWorkers == m_workerThreads.size();
@@ -214,8 +267,22 @@ namespace MultiThreading
 			return lock;
 		}
 
+		// returns the lock after to pause the pool
+		// consider careful scoping management
+		std::unique_lock<std::mutex> waitForAllAndPause() {
+			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
+
+			while (m_tasks.size() != 0 || m_freeWorkers != m_workerThreads.size())
+			{
+				std::this_thread::yield();
+				std::this_thread::sleep_for(std::chrono::microseconds(100));
+			}
+
+			return lock;
+		}
+
 		size_t clearPendingTasks() {
-			std::lock_guard<std::mutex> lock(m_mutex);
+			std::lock_guard<std::mutex> lock(m_taskSubmissionMutex);
 			size_t cleared = 0;
 			std::function<void()> task;
 			while (m_tasks.popFront(task)) {
@@ -226,7 +293,7 @@ namespace MultiThreading
 
 		unsigned int getFreeWorkers() { return m_freeWorkers.load(); };
 		unsigned int getWorkerAmount() {
-			std::lock_guard<std::mutex> lock(m_mutex);
+			std::lock_guard<std::mutex> lock(m_taskSubmissionMutex);
 			return m_workerThreads.size();
 		};
 
@@ -235,7 +302,8 @@ namespace MultiThreading
 #ifdef _DEBUG
 		std::vector<std::string> getErrors() { return m_errors.getCopy(); };
 #endif
-		size_t queueSize() const { return m_tasks.size(); };
+		size_t getQueueSize() const { return m_tasks.size(); };
+		size_t getWorkerCount() const { return m_workerCount; };
 
 #ifdef _DEBUG
 		void logThreadState(const std::string& state, std::mutex* waitingMutex = nullptr) {
@@ -259,5 +327,10 @@ namespace MultiThreading
 			}
 		}
 #endif
+
+	private:
+		void pushTask(std::function<void()> task, std::unique_lock<std::mutex>& accessLock);
+		void pushPriorityTask(std::function<void()> task, std::unique_lock<std::mutex>& accessLock);
 	};
 }
+

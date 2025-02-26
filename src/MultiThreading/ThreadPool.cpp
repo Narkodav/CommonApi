@@ -1,24 +1,34 @@
 #include "../../include/MultiThreading/ThreadPool.h"
 
-
 namespace MultiThreading
 {
+	const unsigned int ThreadPool::THREAD_POOL_MAX_THREADS = std::thread::hardware_concurrency() * 4;
+
 	void ThreadPool::init(int numThreads)
 	{
 		if (m_active.load())
 			shutdown();
-		std::lock_guard<std::mutex> lock(m_mutex);
+
+		std::lock_guard<std::mutex> lock(m_taskSubmissionMutex);
+
 		if (!numThreads)
 			return;
+
 		m_workerThreads.reserve(numThreads);
 		m_activeFlags.resize(numThreads);
+		m_workerCount = numThreads;
 
 		for (int i = 0; i < numThreads; i++)
 		{
 			m_activeFlags[i] = true;
 			m_workerThreads.emplace_back(&ThreadPool::workerLoop, this, i);
 		}
-		m_freeWorkers = numThreads;
+
+		// Wait for all threads to reach their main loop
+		while (m_activeWorkers < numThreads || m_freeWorkers < numThreads) {
+			std::this_thread::yield();
+		}
+
 		m_active.store(true);
 	}
 
@@ -34,11 +44,12 @@ namespace MultiThreading
 #endif
 		std::function<void()> task;
 		m_activeWorkers++;
-		while (1)
+		m_freeWorkers++;
+
+		while (true)
 		{
-			m_freeWorkers++;
 			m_poolFinished.notify_one();
-			if (!m_activeFlags[threadIndex] || !m_active.load()) {
+			if (!m_activeFlags[threadIndex]) {
 #ifdef _DEBUG
 				logThreadState("exiting");
 #endif
@@ -47,27 +58,29 @@ namespace MultiThreading
 #ifdef _DEBUG
 			logThreadState("waiting for task");
 #endif
-			if (!m_tasks.waitAndPopFrontFor(task, std::chrono::milliseconds(100)))
-				continue;
-
-			m_freeWorkers--;
+			if (m_tasks.waitAndPopFrontFor(task, std::chrono::milliseconds(100)))
+			{
+				m_freeWorkers--;
 #ifdef _DEBUG
-			logThreadState("executing task");
-			try {
-				task();
-			}
-			catch (const std::exception& e) {
-				std::cerr << "Task exception in thread "
-					<< std::this_thread::get_id()
-					<< ": " << e.what() << "\n";
-				m_errors.pushBack(e.what());
-			}
-			logThreadState("task completed");
+				logThreadState("executing task");
+				try {
+					task();
+				}
+				catch (const std::exception& e) {
+					std::cerr << "Task exception in thread "
+						<< std::this_thread::get_id()
+						<< ": " << e.what() << "\n";
+					m_errors.pushBack(e.what());
+				}
+				logThreadState("task completed");
 
 #else
-			task();
+				task();
 #endif
+				m_freeWorkers++;
+			}
 		}
+		m_freeWorkers--;
 		m_activeWorkers--;
 	}
 
@@ -90,7 +103,7 @@ namespace MultiThreading
 
 	void ThreadPool::terminate() //terminates immediately, abandons pending tasks
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
+		std::lock_guard<std::mutex> lock(m_taskSubmissionMutex);
 		m_active.store(0);
 		for (size_t i = 0; i < m_workerThreads.size(); i++) {
 			m_activeFlags[i] = false;
@@ -102,12 +115,8 @@ namespace MultiThreading
 		m_workerThreads.clear();
 	}
 
-	void ThreadPool::pushTask(std::function<void()> task)
+	void ThreadPool::pushTask(std::function<void()> task, std::unique_lock<std::mutex>& accessLock)
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
-		if (!m_active.load())
-			return;
-
 #ifdef _DEBUG
 		auto wrappedTask = [this, task]() {
 			auto threadId = std::this_thread::get_id();
@@ -136,11 +145,8 @@ namespace MultiThreading
 #endif
 	}
 
-	void ThreadPool::pushPriorityTask(std::function<void()> task)
+	void ThreadPool::pushPriorityTask(std::function<void()> task, std::unique_lock<std::mutex>& accessLock)
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
-		if (!m_active.load())
-			return;
 #ifdef _DEBUG
 		auto wrappedTask = [this, task]() {
 			auto threadId = std::this_thread::get_id();
@@ -169,13 +175,38 @@ namespace MultiThreading
 #endif
 	}
 
+	/**
+	* @brief Resizes the thread pool to the specified number of threads
+	* @param numThreads New number of threads
+	* @note Resizing to 0 threads will effectively shutdown the pool
+	*       Once shutdown, the pool will reject new tasks until resized to >0 threads
+	*/
 	void ThreadPool::resize(size_t newSize) {
-		std::lock_guard<std::mutex> lock(m_mutex);
+
+		if (newSize == 0)
+		{
+			shutdown();
+			return;
+		}
+
+		if (newSize > THREAD_POOL_MAX_THREADS)
+			newSize = THREAD_POOL_MAX_THREADS;
+
+		if (!m_active.load())
+		{
+			init(newSize);
+			return;
+		}
+		else if (newSize == m_workerThreads.size())
+			return;
 
 		if (newSize > m_workerThreads.size()) {
 			for (size_t i = m_workerThreads.size(); i < newSize; ++i) {
 				m_activeFlags.pushBack(true);
 				m_workerThreads.emplace_back(&ThreadPool::workerLoop, this, i);
+			}
+			while (m_activeWorkers < newSize) {
+				std::this_thread::yield();
 			}
 		}
 		else if (newSize < m_workerThreads.size()) {
@@ -183,22 +214,19 @@ namespace MultiThreading
 				m_activeFlags[i] = false;
 				m_workerThreads[i].join();
 			}
+			m_activeFlags.resize(newSize);
 			m_workerThreads.resize(newSize);
 		}
+		m_workerCount = newSize;
 	}
 
 	std::vector<std::thread::id> ThreadPool::getWorkerIds()
 	{
-		std::lock_guard<std::mutex> lock(m_mutex);
+		std::lock_guard<std::mutex> lock(m_taskSubmissionMutex);
 		std::vector<std::thread::id> ids;
-		for (int i = 0; i < m_workerThreads.size(); i++)
+		for (int i = 0; i < m_workerCount; i++)
 			ids.emplace_back(m_workerThreads[i].get_id());
 
 		return ids;
-	}
-
-	ThreadPool::~ThreadPool()
-	{
-		shutdown();
 	}
 }
