@@ -31,14 +31,14 @@ namespace MultiThreading
 		class Subscription
 		{
 			using EventEnum = Policy::Enum;
-			EventSystem<Policy>* m_system;
+			EventSystem<Policy>* m_owner;
 			EventEnum m_event;
 			std::function<void()> m_unsubscribe;
 			bool m_active;
 
 		public:
-			Subscription(EventSystem<Policy>* system, EventEnum event, std::function<void()> unsubscribe)
-				: m_system(system)
+			Subscription(EventSystem<Policy>* owner, EventEnum event, std::function<void()> unsubscribe)
+				: m_owner(owner)
 				, m_event(event)
 				, m_unsubscribe(std::move(unsubscribe))
 				, m_active(1)
@@ -46,7 +46,7 @@ namespace MultiThreading
 
 			// Move constructor
 			Subscription(Subscription&& other) noexcept
-				: m_system(other.m_system)
+				: m_owner(other.m_owner)
 				, m_event(other.m_event)
 				, m_unsubscribe(std::move(other.m_unsubscribe))
 				, m_active(other.m_active)
@@ -58,7 +58,7 @@ namespace MultiThreading
 			Subscription& operator=(Subscription&& other) noexcept {
 				if (this != &other) {
 					unsubscribe();
-					m_system = other.m_system;
+					m_owner = other.m_owner;
 					m_event = other.m_event;
 					m_unsubscribe = std::move(other.m_unsubscribe);
 					m_active = other.m_active;
@@ -85,6 +85,14 @@ namespace MultiThreading
 			}
 
 			bool isActive() const { return m_active; }
+
+		private:
+			void adopt(EventSystem<Policy>* newOwner, std::function<void()> newUnsubscribe)
+			{
+				m_owner = newOwner;
+				m_unsubscribe = std::move(newUnsubscribe);
+			}
+			friend class EventSystem<Policy>;
 		};
 
 	private:
@@ -105,8 +113,8 @@ namespace MultiThreading
 
 		// Array of functions to create subscribers, one for each event
 		using SubscriberCreator = std::any(*)();
-		static constexpr std::array<SubscriberCreator, static_cast<size_t>(EventEnum::EVENT_NUM)>
-			createSubscriberFunctions = makeSubscriberCreators(std::make_index_sequence<static_cast<size_t>(EventEnum::EVENT_NUM)>{});
+		static constexpr std::array<SubscriberCreator, Policy::EVENT_NUM>
+			createSubscriberFunctions = makeSubscriberCreators(std::make_index_sequence<Policy::EVENT_NUM>{});
 
 		template<EventEnum E>
 		static bool compareCallbacks(const Callback<E>& a, const Callback<E>& b) {
@@ -136,7 +144,7 @@ namespace MultiThreading
 
 		EventSystem() {
 			auto access = m_subscriberMap.getWriteAccess();
-			for (int i = 0; i < static_cast<int>(EventEnum::EVENT_NUM); ++i) {
+			for (int i = 0; i < Policy::EVENT_NUM; ++i) {
 				access->insert({
 					static_cast<EventEnum>(i),
 					createSubscriberFunctions[i]()
