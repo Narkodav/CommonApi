@@ -1,220 +1,233 @@
 #pragma once
 #include "../Namespaces.h"
-#include "Synchronized.h"
 
+#include <vector>
 #include <functional>
-#include <array>
+#include <type_traits>
 #include <stdexcept>
-#include <any>
+#include <memory>
+#include <shared_mutex>
 
 namespace MultiThreading
 {
-	template<typename Policy>
-
+	template <typename Policy>
 	class EventSystem
 	{
-	public:
-		using EventEnum = Policy::Enum;
+	private:
+		using EventEnum = typename Policy::EventEnum;
 
-		template<EventEnum E>
-		using EventTraits = typename Policy::template Traits<E>;
-
-		template<EventEnum E>
-		using Callback = std::function<typename EventTraits<E>::Signature>;
-
-		template<EventEnum E>
-		using Subscribers = std::vector<Callback<E>>;
-
-		using SunscriberMap = Synchronized<std::unordered_map<EventEnum, std::any>>;
-
-	
-		class Subscription
+		//used as a unique identifier for each subscription
+		class SubscriptionBase : public std::enable_shared_from_this<SubscriptionBase> //exists only in a form of shared pointers
 		{
-			using EventEnum = Policy::Enum;
-			EventSystem<Policy>* m_owner;
-			EventEnum m_event;
-			std::function<void()> m_unsubscribe;
-			bool m_active;
+		private:
+			EventSystem* m_owner;
 
 		public:
-			Subscription(EventSystem<Policy>* owner, EventEnum event, std::function<void()> unsubscribe)
-				: m_owner(owner)
-				, m_event(event)
-				, m_unsubscribe(std::move(unsubscribe))
-				, m_active(1)
-			{}
+			SubscriptionBase(EventSystem* owner) : m_owner(owner) {};
 
-			// Move constructor
-			Subscription(Subscription&& other) noexcept
-				: m_owner(other.m_owner)
-				, m_event(other.m_event)
-				, m_unsubscribe(std::move(other.m_unsubscribe))
-				, m_active(other.m_active)
+			SubscriptionBase(const SubscriptionBase&) = delete;
+			SubscriptionBase& operator=(const SubscriptionBase&) = delete;
+
+			SubscriptionBase(SubscriptionBase&&) noexcept = delete;
+			SubscriptionBase& operator=(SubscriptionBase&&) noexcept = delete;
+
+			void unsubscribe()
 			{
-				other.m_active = 0;
+				std::unique_lock lock(m_owner->m_mutex);
+				m_owner->storage.erase(this->shared_from_this());
+				m_owner = nullptr;
 			}
 
-			// Move assignment
-			Subscription& operator=(Subscription&& other) noexcept {
-				if (this != &other) {
-					unsubscribe();
-					m_owner = other.m_owner;
-					m_event = other.m_event;
-					m_unsubscribe = std::move(other.m_unsubscribe);
-					m_active = other.m_active;
-					other.m_active = false;
-				}
-				return *this;
+			void migrate(EventSystem* newOwner)
+			{
+				m_owner = newOwner;
 			}
 
-			// Disable copying
+			friend class EventSystem;
+		};
+
+		template<EventEnum E>
+		struct Event
+		{
+			using Signature = typename Policy::template Traits<E>::Signature;
+			using Callback = std::function<Signature>;
+			using Subscribers = std::vector<std::pair<std::shared_ptr<SubscriptionBase>, Callback>>;
+			Subscribers subs;
+
+			Event() : subs() {};
+
+			Event(const Event&) = delete;
+			Event& operator=(const Event&) = delete;
+
+			Event(Event&&) noexcept = default;
+			Event& operator=(Event&&) noexcept = default;
+		};
+
+		// Helper tuple type that contains vectors for each enum value
+		template<EventEnum... Es>
+		struct EventStorage {
+			std::tuple<Event<Es>...> events;
+			static const size_t size = Policy::EVENT_NUM;
+
+			// Helper method to get the vector for a specific event
+			template<EventEnum E>
+			Event<E>& getEvent() {
+				return std::get<Event<E>>(events);
+			}
+
+			template<EventEnum E>
+			const Event<E>& getEvent() const {
+				return std::get<Event<E>>(events);
+			}
+
+			template<typename Func>
+			void iterate(Func&& callback) {
+				[&] <size_t... I>(std::index_sequence<I...>) {
+					//will short circuit on false return
+					(... && callback(std::get<Event<static_cast<EventEnum>(I)>>(events)));
+				}(std::make_index_sequence<size>{});
+			}
+
+			void erase(std::shared_ptr<SubscriptionBase> subscription)
+			{
+				iterate([&](auto& event) -> bool {
+					auto it = std::find_if(event.subs.begin(), event.subs.end(),
+						[&](const auto& sub) {
+							return subscription.get() == sub.first.get();
+						});
+					if (it != event.subs.end()) {
+						event.subs.erase(it);
+						return false;  // Stop iteration
+					}
+					return true;  // Continue to next event
+					});
+			}
+
+			EventStorage() : events{ Event<Es>{}... } {};
+
+			EventStorage(const EventStorage&) = delete;
+			EventStorage& operator=(const EventStorage&) = delete;
+
+			EventStorage(EventStorage&&) noexcept = default;
+			EventStorage& operator=(EventStorage&&) noexcept = default;
+		};
+
+		// Create sequence of enum values
+		template<std::size_t... Is>
+		static constexpr auto makeEnumSequence(std::index_sequence<Is...>) {
+			return EventStorage<static_cast<EventEnum>(Is)...>{};
+		}
+
+		using makeEventStorage = decltype(makeEnumSequence(std::make_index_sequence<Policy::EVENT_NUM>{}));
+
+		// Storage for all event vectors
+		makeEventStorage storage;
+		mutable std::shared_mutex m_mutex;
+
+	public:
+
+		class Subscription
+		{
+		private:
+			std::weak_ptr<SubscriptionBase> m_base;
+
+		public:
+			Subscription() : m_base(std::weak_ptr<SubscriptionBase>()) {};
+			Subscription(std::shared_ptr<SubscriptionBase>& base) : m_base(base) {};
+
 			Subscription(const Subscription&) = delete;
 			Subscription& operator=(const Subscription&) = delete;
 
-			// Explicit unsubscribe
-			void unsubscribe() {
-				if (m_active) {
-					m_unsubscribe();
-					m_active = 0;
-				}
-			}
+			Subscription(Subscription&&) = default;
 
-			// Auto-unsubscribe on destruction
-			~Subscription() {
-				unsubscribe();
-			}
-
-			bool isActive() const { return m_active; }
-
-		private:
-			void adopt(EventSystem<Policy>* newOwner, std::function<void()> newUnsubscribe)
+			Subscription& operator=(Subscription&& other)
 			{
-				m_owner = newOwner;
-				m_unsubscribe = std::move(newUnsubscribe);
+				if (this == &other)
+					return *this;
+				unsubscribe();
+				m_base = std::exchange(other.m_base, std::weak_ptr<SubscriptionBase>());
+
+				return *this;
 			}
-			friend class EventSystem<Policy>;
+
+			~Subscription() { unsubscribe(); }
+
+			void unsubscribe() {
+				auto lock = m_base.lock();
+				if (lock == nullptr)
+					return;
+				lock->unsubscribe();
+				m_base.reset();
+			}
+
+			inline bool isValid() const { return !m_base.expired(); };
 		};
 
-	private:
+		EventSystem() : storage() {};
 
-		SunscriberMap m_subscriberMap;
+		EventSystem(const EventSystem&) = delete;
+		EventSystem& operator=(const EventSystem&) = delete;
 
-		// Helper function to create the correct subscriber vector for a given event
-		template<EventEnum E>
-		static std::any createSubscriberVector() {
-			return std::any(Subscribers<E>{});
-		}
-
-		// Helper to build the array of creator functions
-		template<size_t... Is>
-		static constexpr auto makeSubscriberCreators(std::index_sequence<Is...>) {
-			return std::array{ &createSubscriberVector<static_cast<EventEnum>(Is)>... };
-		}
-
-		// Array of functions to create subscribers, one for each event
-		using SubscriberCreator = std::any(*)();
-		static constexpr std::array<SubscriberCreator, Policy::EVENT_NUM>
-			createSubscriberFunctions = makeSubscriberCreators(std::make_index_sequence<Policy::EVENT_NUM>{});
-
-		template<EventEnum E>
-		static bool compareCallbacks(const Callback<E>& a, const Callback<E>& b) {
-			return a.target_type() == b.target_type() &&
-				(a.target<typename EventTraits<E>::Signature*>() == b.target<typename EventTraits<E>::Signature*>());
-		}
-
-		template<EventEnum E>
-		const Subscribers<E>& getSubscribers(SunscriberMap::ReadAccess& access) {
-			auto it = access->find(E);
-			if (it == access->end()) {
-				throw std::runtime_error("Invalid event enum");
-			}
-			return std::any_cast<const Subscribers<E>&>(it->second);
-		}
-
-		template<EventEnum E>
-		Subscribers<E>& getSubscribers(SunscriberMap::WriteAccess& access) {
-			auto it = access->find(E);
-			if (it == access->end()) {
-				throw std::runtime_error("Invalid event enum");
-			}
-			return std::any_cast<Subscribers<E>&>(it->second);
-		}
-
-	public:
-
-		EventSystem() {
-			auto access = m_subscriberMap.getWriteAccess();
-			for (int i = 0; i < Policy::EVENT_NUM; ++i) {
-				access->insert({
-					static_cast<EventEnum>(i),
-					createSubscriberFunctions[i]()
-					});
-			}
-		}
-
-		template<EventEnum E>
-		Subscription subscribe(Callback<E> callback) {
-			if (!callback) {
-				throw std::invalid_argument("Callback cannot be null");
-			}
-
-			auto access = m_subscriberMap.getWriteAccess();
-			auto& subscribers = getSubscribers<E>(access);
-			subscribers.push_back(callback);
-
-			// Create unsubscribe function that captures the callback
-			auto unsubscribe = [this, callback]() {
-				auto access = m_subscriberMap.getWriteAccess();
-				auto& subs = this->getSubscribers<E>(access);
-				subs.erase(
-					std::remove_if(
-						subs.begin(),
-						subs.end(),
-						[this, &callback](const Callback<E>& cb) {
-							return compareCallbacks<E>(cb, callback);
-						}
-					),
-					subs.end()
-				);
-				};
-
-			return Subscription(this, E, std::move(unsubscribe));
-		}
-
-		// Variadic template to handle different parameter counts
-		template<EventEnum E, typename... Args>
-		void emit(Args&&... args) {
-			static_assert(std::is_invocable_v<typename EventSystem::EventTraits<E>::Signature, Args...>,
-				"Parameter types don't match event signature");
-			auto access = m_subscriberMap.getReadAccess();
-			try {
-				auto& subscribers = getSubscribers<E>(access);
-				for (auto& subscriber : subscribers) {
-					subscriber(std::forward<Args>(args)...);
+		EventSystem(EventSystem&& other) noexcept
+		{
+			std::scoped_lock locks(m_mutex, other.m_mutex);
+			storage = std::exchange(other.storage, makeEventStorage{});
+			storage.iterate([this](auto& event) {
+				for (auto& sub : event.subs)
+				{
+					sub.first->migrate(this);
 				}
-			}
-			catch (const std::bad_any_cast& e) {
-				throw std::runtime_error("Type mismatch in event emission: " + std::string(e.what()));
+				return true;
+				});
+		};
+
+		EventSystem& operator=(EventSystem&& other) noexcept
+		{
+			if (this == &other)
+				return *this;
+
+			std::scoped_lock locks(m_mutex, other.m_mutex);
+			storage = std::exchange(other.storage, makeEventStorage{});
+			storage.iterate([this](auto& event) {
+				for (auto& sub : event.subs)
+				{
+					sub.first->migrate(this);
+				}
+				return true;
+				});
+
+			return *this;
+		};
+
+		template<EventEnum E>
+		Subscription subscribe(typename Event<E>::Callback callback) {
+			std::unique_lock lock(m_mutex);
+			auto base = std::make_shared<SubscriptionBase>(this);
+			Subscription sub(base);
+			storage.template getEvent<E>().subs.push_back(
+				std::make_pair(std::move(base), std::move(callback)));
+			return sub;
+		}
+
+		//emissing the same event simultaneously is legal, callback should manage their thread safety internally
+		template<EventEnum E, typename... Args>
+		void emit(Args&&... args) const {
+			std::shared_lock lock(m_mutex);
+			static_assert(std::is_invocable_v<typename Event<E>::Signature, Args...>,
+				"Parameter types don't match event signature");
+
+			const auto& subs = storage.template getEvent<E>().subs;
+			for (const auto& sub : subs) {
+				sub.second(std::forward<Args>(args)...);
 			}
 		}
 
 		template<EventEnum E>
 		bool hasSubscribers() const {
-			auto access = m_subscriberMap.getReadAccess();
-			try {
-				const auto& subscribers = getSubscribers<E>(access);
-				return !subscribers.empty();
-			}
-			catch (const std::bad_any_cast&) {
-				return false;
-			}
+			std::shared_lock lock(m_mutex);
+			return !storage.template getEvent<E>().subs.empty();
 		}
 
-		template<EventEnum E>
-		void clearSubscribers() {
-			auto access = m_subscriberMap.getWriteAccess();
-			auto& subscribers = getSubscribers<E>(access);
-			subscribers.clear();
-		}
 	};
+
 }
