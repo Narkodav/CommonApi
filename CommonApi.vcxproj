@@ -61,6 +61,7 @@
     <ClInclude Include="include\MultiThreading\Logger.h" />
     <ClInclude Include="include\MultiThreading\MemoryPool.h" />
     <ClInclude Include="include\MultiThreading\PointerControlBlock.h" />
+    <ClInclude Include="include\MultiThreading\Profiler.h" />
     <ClInclude Include="include\MultiThreading\Queue.h" />
     <ClInclude Include="include\MultiThreading\Synchronized.h" />
     <ClInclude Include="include\MultiThreading\TaskCoordinator.h" />
@@ -72,6 +73,7 @@
     <ClInclude Include="include\Physics\RayCasting.h" />
     <ClInclude Include="include\Utilities\ArrayNd.h" />
     <ClInclude Include="include\Utilities\BinPacker.h" />
+    <ClInclude Include="include\Utilities\Flag.h" />
     <ClInclude Include="include\Utilities\Functions.h" />
     <ClInclude Include="include\Utilities\GridContext.h" />
     <ClInclude Include="include\Utilities\PathFinder.h" />
