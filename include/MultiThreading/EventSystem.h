@@ -14,8 +14,6 @@ namespace MultiThreading
 	class EventSystem
 	{
 	private:
-		using EventEnum = typename Policy::EventEnum;
-
 		//used as a unique identifier for each subscription
 		class SubscriptionBase : public std::enable_shared_from_this<SubscriptionBase> //exists only in a form of shared pointers
 		{
@@ -45,6 +43,9 @@ namespace MultiThreading
 
 			friend class EventSystem;
 		};
+
+	public:
+		using EventEnum = typename Policy::EventEnum;
 
 		template<EventEnum E>
 		struct Event
@@ -88,6 +89,14 @@ namespace MultiThreading
 				}(std::make_index_sequence<size>{});
 			}
 
+			template<typename Func>
+			void iterate(Func&& callback) const {
+				[&] <size_t... I>(std::index_sequence<I...>) {
+					//will short circuit on false return
+					(... && callback(std::get<Event<static_cast<EventEnum>(I)>>(events)));
+				}(std::make_index_sequence<size>{});
+			}
+
 			void erase(std::shared_ptr<SubscriptionBase> subscription)
 			{
 				iterate([&](auto& event) -> bool {
@@ -120,6 +129,7 @@ namespace MultiThreading
 
 		using makeEventStorage = decltype(makeEnumSequence(std::make_index_sequence<Policy::EVENT_NUM>{}));
 
+	private:
 		// Storage for all event vectors
 		makeEventStorage storage;
 		mutable std::shared_mutex m_mutex;
@@ -222,12 +232,38 @@ namespace MultiThreading
 			}
 		}
 
+		bool hasSubscribers() const {
+			std::shared_lock lock(m_mutex);
+			bool validator = false;
+			storage.iterate([&validator](auto& event) {
+				if (!event.subs.empty())
+				{
+					validator = true;
+					return false;
+				}
+				return true;
+				});
+			return validator;
+		}
+
 		template<EventEnum E>
 		bool hasSubscribers() const {
 			std::shared_lock lock(m_mutex);
 			return !storage.template getEvent<E>().subs.empty();
 		}
 
-	};
+		void clear() {
+			std::unique_lock lock(m_mutex);
+			storage.iterate([](auto& event) {
+				event.subs.clear();
+				return true;
+				});
+		}
 
+		template<EventEnum E>
+		void clear() {
+			std::unique_lock lock(m_mutex);
+			storage.template getEvent<E>().subs.clear();
+		}
+	};
 }

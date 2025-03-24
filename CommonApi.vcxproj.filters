@@ -158,5 +158,8 @@
     <ClInclude Include="include\Utilities\PathFinder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\MultiThreading\EventSuperSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
