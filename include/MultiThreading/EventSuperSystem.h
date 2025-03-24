@@ -29,6 +29,38 @@ namespace MultiThreading
 
 		std::tuple<EventSystem<EventPolicies>...> m_eventSystems;
 
+		template<typename EventEnum, typename EventPolicy, typename... Rest>
+		constexpr auto& recursiveFind()
+		{
+			if constexpr (std::is_same_v<EventEnum, typename EventSystem<EventPolicy>::EventEnum>)
+				return std::get<EventSystem<EventPolicy>>(m_eventSystems);
+			else if constexpr (sizeof...(Rest) > 0)
+				return recursiveFind<EventEnum, Rest...>();
+			else
+				static_assert(sizeof...(Rest) != 0, "No matching EventSystem found for EventEnum");
+		}
+
+		template<typename EventEnum>
+		constexpr auto& findEventSystem() {
+			return recursiveFind<EventEnum, EventPolicies...>();
+		};
+
+		template<typename EventEnum, typename EventPolicy, typename... Rest>
+		constexpr const auto& recursiveFind() const
+		{
+			if constexpr (std::is_same_v<EventEnum, typename EventSystem<EventPolicy>::EventEnum>)
+				return std::get<EventSystem<EventPolicy>>(m_eventSystems);
+			else if constexpr (sizeof...(Rest) > 0)
+				return recursiveFind<EventEnum, Rest...>();
+			else
+				static_assert(sizeof...(Rest) != 0, "No matching EventSystem found for EventEnum");
+		}
+
+		template<typename EventEnum>
+		constexpr const auto& findEventSystem() const {
+			return recursiveFind<EventEnum, EventPolicies...>();
+		};
+
 	public:
 
 		EventSuperSystem() : m_eventSystems() {};
@@ -36,28 +68,25 @@ namespace MultiThreading
 		EventSuperSystem(const EventSuperSystem&) = delete;
 		EventSuperSystem& operator=(const EventSuperSystem&) = delete;
 
-		EventSuperSystem(EventSuperSystem&& other) noexcept = default;
+		EventSuperSystem(EventSuperSystem&&) noexcept = default;
 		EventSuperSystem& operator=(EventSuperSystem&&) noexcept = default;
 
-		template<typename EventPolicy, EventSystem<EventPolicy>::EventEnum E>
-		typename EventSystem<EventPolicy>::template Subscription subscribe
-		(typename EventSystem<EventPolicy>::template Event<E>::Callback callback) {
-			static_assert((std::is_same_v<EventPolicy, EventPolicies> || ...),
-				"EventPolicy must be one of the policies passed to EventSuperSystem"
-				);
-			return std::get<EventSystem<EventPolicy>>(m_eventSystems).template subscribe<E>(std::move(callback));
+		template<auto E>
+		auto subscribe(auto callback) {
+			using EventEnum = decltype(E);
+			auto& eventSystem = findEventSystem<EventEnum>();
+			return eventSystem.template subscribe<E>(std::move(callback));
 		}
 
-		template<typename EventPolicy, EventSystem<EventPolicy>::EventEnum E, typename... Args>
+		template<auto E, typename... Args>
 		void emit(Args&&... args) const {
-			static_assert((std::is_same_v<EventPolicy, EventPolicies> || ...),
-				"EventPolicy must be one of the policies passed to EventSuperSystem"
-				);
-			std::get<EventSystem<EventPolicy>>(m_eventSystems).template emit<E>(std::forward<Args>(args)...);
+			using EventEnum = decltype(E);
+			const auto& eventSystem = findEventSystem<EventEnum>();
+			eventSystem.template emit<E>(std::forward<Args>(args)...);
 		}
 
 		bool hasSubscribers() const {
-			return (std::get<EventSystem<EventPolicies>>(m_eventSystems).hasSubscribers() ||...);
+			return (std::get<EventSystem<EventPolicies>>(m_eventSystems).hasSubscribers() || ...);
 		}
 
 		template<typename EventPolicy>
@@ -68,12 +97,11 @@ namespace MultiThreading
 			return std::get<EventSystem<EventPolicy>>(m_eventSystems).hasSubscribers();
 		}
 
-		template<typename EventPolicy, EventSystem<EventPolicy>::EventEnum E>
+		template<auto E>
 		bool hasSubscribers() const {
-			static_assert((std::is_same_v<EventPolicy, EventPolicies> || ...),
-				"EventPolicy must be one of the policies passed to EventSuperSystem"
-				);
-			return std::get<EventSystem<EventPolicy>>(m_eventSystems).template hasSubscribers<E>();
+			using EventEnum = decltype(E);
+			const auto& eventSystem = findEventSystem<EventEnum>();
+			return eventSystem.template hasSubscribers<E>();
 		}
 
 		void clear() {
@@ -88,12 +116,11 @@ namespace MultiThreading
 			std::get<EventSystem<EventPolicy>>(m_eventSystems).clear();
 		}
 
-		template<typename EventPolicy, EventSystem<EventPolicy>::EventEnum E>
+		template<auto E>
 		void clear() {
-			static_assert((std::is_same_v<EventPolicy, EventPolicies> || ...),
-				"EventPolicy must be one of the policies passed to EventSuperSystem"
-				);
-			std::get<EventSystem<EventPolicy>>(m_eventSystems).template clear<E>();
+			using EventEnum = decltype(E);
+			auto& eventSystem = findEventSystem<EventEnum>();
+			eventSystem.template clear<E>();
 		}
 	};
 }
