@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "../Namespaces.h"
 #include "Deque.h"
 #include "Vector.h"
@@ -40,13 +40,139 @@ namespace MultiThreading
 		std::atomic<unsigned int> m_freeWorkers = 0;
 		std::atomic<unsigned int> m_activeWorkers = 0;
 		std::atomic<unsigned int> m_exited = 0;
-		Deque<std::function<void()>> m_tasks;
+		Deque<std::function<void(size_t)>> m_tasks;
 		Vector<bool> m_activeFlags;
 		std::atomic<bool> m_active = 0;
 		std::mutex m_taskSubmissionMutex;
 		std::condition_variable_any m_poolFinished;
 
 		void workerLoop(size_t threadIndex);
+
+		template<typename Task>
+		void pushTask(Task&& task, std::unique_lock<std::mutex>& accessLock)
+		{
+			if constexpr (std::is_invocable_v<Task>) {
+#ifdef _DEBUG
+				m_tasks.pushBack([task = std::forward<Task>(task), this](size_t threadIndex) {
+					(void)threadIndex;
+					auto threadId = std::this_thread::get_id();
+					{
+						std::lock_guard<std::mutex> lock(m_statesMutex);
+						m_threadStates[threadId].currentTask =
+							"Task started at " +
+							std::to_string(
+								std::chrono::system_clock::now()
+								.time_since_epoch()
+								.count()
+							);
+					}
+					task();
+					{
+						std::lock_guard<std::mutex> lock(m_statesMutex);
+						m_threadStates[threadId].currentTask = "idle";
+					}
+					});
+#else
+				m_tasks.pushBack([task = std::forward<Task>(task), this](size_t threadIndex) {
+					(void)threadIndex;
+					task();
+					});
+#endif
+			}
+			else if constexpr (std::is_invocable_v<Task, size_t>) {
+#ifdef _DEBUG
+				m_tasks.pushBack([task = std::forward<Task>(task), this](size_t threadIndex) {
+					auto threadId = std::this_thread::get_id();
+					{
+						std::lock_guard<std::mutex> lock(m_statesMutex);
+						m_threadStates[threadId].currentTask =
+							"Task started at " +
+							std::to_string(
+								std::chrono::system_clock::now()
+								.time_since_epoch()
+								.count()
+							);
+					}
+					task(threadIndex);
+					{
+						std::lock_guard<std::mutex> lock(m_statesMutex);
+						m_threadStates[threadId].currentTask = "idle";
+					}
+					});
+#else
+				m_tasks.pushBack(std::forward<Task>(task));
+#endif
+			}
+			else {
+				static_assert(
+					std::is_invocable_v<Task> || std::is_invocable_v<Task, size_t>,
+					"Task must be callable as either void() or void(size_t)"
+					);
+			}
+		}
+
+		template<typename Task>
+		void pushPriorityTask(std::function<void()> task, std::unique_lock<std::mutex>& accessLock)
+		{
+			if constexpr (std::is_invocable_v<Task>) {
+#ifdef _DEBUG
+				m_tasks.pushFront([task = std::forward<Task>(task), this](size_t threadIndex) {
+					(void)threadIndex;
+					auto threadId = std::this_thread::get_id();
+					{
+						std::lock_guard<std::mutex> lock(m_statesMutex);
+						m_threadStates[threadId].currentTask =
+							"Task started at " +
+							std::to_string(
+								std::chrono::system_clock::now()
+								.time_since_epoch()
+								.count()
+							);
+					}
+					task();
+					{
+						std::lock_guard<std::mutex> lock(m_statesMutex);
+						m_threadStates[threadId].currentTask = "idle";
+					}
+					});
+#else
+				m_tasks.pushFront([task = std::forward<Task>(task), this](size_t threadIndex) {
+					(void)threadIndex;
+					task();
+					});
+#endif
+			}
+			else if constexpr (std::is_invocable_v<Task, size_t>) {
+#ifdef _DEBUG
+				m_tasks.pushFront([task = std::forward<Task>(task), this](size_t threadIndex) {
+					auto threadId = std::this_thread::get_id();
+					{
+						std::lock_guard<std::mutex> lock(m_statesMutex);
+						m_threadStates[threadId].currentTask =
+							"Task started at " +
+							std::to_string(
+								std::chrono::system_clock::now()
+								.time_since_epoch()
+								.count()
+							);
+					}
+					task(threadIndex);
+					{
+						std::lock_guard<std::mutex> lock(m_statesMutex);
+						m_threadStates[threadId].currentTask = "idle";
+					}
+					});
+#else
+				m_tasks.pushFront(std::forward<Task>(task));
+#endif
+			}
+			else {
+				static_assert(
+					std::is_invocable_v<Task> || std::is_invocable_v<Task, size_t>,
+					"Task must be callable as either void() or void(size_t)"
+					);
+			}
+		}
 
 	public:
 		ThreadPool() = default;
@@ -121,16 +247,18 @@ namespace MultiThreading
 		void shutdown();
 		void terminate();
 
-		bool pushTask(std::function<void()> task) {
+		template<typename Task>
+		bool pushTask(Task&& task) {
 			if (!m_active.load())
 				return false;
 			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
-			pushTask(task, lock);
+			pushTask(std::forward<Task>(task), lock);
 			return true;
 		};
 
 		// Vector of tasks with move semantics
-		bool pushTasks(std::vector<std::function<void()>>&& tasks) {
+		template<typename Task>
+		bool pushTasks(std::vector<Task>&& tasks) {
 			if (!m_active.load())
 				return false;
 			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
@@ -140,7 +268,8 @@ namespace MultiThreading
 		}
 
 		// Const reference vector version
-		bool pushTasks(const std::vector<std::function<void()>>& tasks) {
+		template<typename Task>
+		bool pushTasks(const std::vector<Task>& tasks) {
 			if (!m_active.load())
 				return false;
 			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
@@ -187,16 +316,18 @@ namespace MultiThreading
 		//	return true;
 		//}
 
-		bool pushPriorityTask(std::function<void()> task) {
+		template<typename Task>
+		bool pushPriorityTask(Task&& task) {
 			if (!m_active.load())
 				return false;
 			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
-			pushPriorityTask(task, lock);
+			pushPriorityTask(std::forward<Task>(task), lock);
 			return true;
 		};
 
 		// Vector of tasks with move semantics
-		bool pushPriorityTasks(std::vector<std::function<void()>>&& tasks) {
+		template<typename Task>
+		bool pushPriorityTasks(std::vector<Task>&& tasks) {
 			if (!m_active.load())
 				return false;
 			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
@@ -206,7 +337,8 @@ namespace MultiThreading
 		}
 
 		// Const reference vector version
-		bool pushPriorityTasks(const std::vector<std::function<void()>>& tasks) {
+		template<typename Task>
+		bool pushPriorityTasks(const std::vector<Task>& tasks) {
 			if (!m_active.load())
 				return false;
 			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
@@ -284,7 +416,7 @@ namespace MultiThreading
 		size_t clearPendingTasks() {
 			std::lock_guard<std::mutex> lock(m_taskSubmissionMutex);
 			size_t cleared = 0;
-			std::function<void()> task;
+			std::function<void(size_t)> task;
 			while (m_tasks.popFront(task)) {
 				cleared++;
 			}

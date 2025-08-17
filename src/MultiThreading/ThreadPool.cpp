@@ -42,7 +42,7 @@ namespace MultiThreading
 			m_threadStates[info.id] = info;
 		}
 #endif
-		std::function<void()> task;
+		std::function<void(size_t)> task;
 		m_activeWorkers++;
 		m_freeWorkers++;
 
@@ -64,7 +64,7 @@ namespace MultiThreading
 #ifdef _DEBUG
 				logThreadState("executing task");
 				try {
-					task();
+					task(threadIndex);
 				}
 				catch (const std::exception& e) {
 					std::cerr << "Task exception in thread "
@@ -75,7 +75,7 @@ namespace MultiThreading
 				logThreadState("task completed");
 
 #else
-				task();
+				task(threadIndex);
 #endif
 				m_freeWorkers++;
 			}
@@ -113,66 +113,6 @@ namespace MultiThreading
 			worker.join();
 		}
 		m_workerThreads.clear();
-	}
-
-	void ThreadPool::pushTask(std::function<void()> task, std::unique_lock<std::mutex>& accessLock)
-	{
-#ifdef _DEBUG
-		auto wrappedTask = [this, task]() {
-			auto threadId = std::this_thread::get_id();
-			{
-				std::lock_guard<std::mutex> lock(m_statesMutex);
-				m_threadStates[threadId].currentTask =
-					"Task started at " +
-					std::to_string(
-						std::chrono::system_clock::now()
-						.time_since_epoch()
-						.count()
-					);
-			}
-
-			task();
-
-			{
-				std::lock_guard<std::mutex> lock(m_statesMutex);
-				m_threadStates[threadId].currentTask = "idle";
-			}
-			};
-
-		m_tasks.pushBack(std::move(wrappedTask));
-#else
-		m_tasks.pushBack(std::move(task));
-#endif
-	}
-
-	void ThreadPool::pushPriorityTask(std::function<void()> task, std::unique_lock<std::mutex>& accessLock)
-	{
-#ifdef _DEBUG
-		auto wrappedTask = [this, task]() {
-			auto threadId = std::this_thread::get_id();
-			{
-				std::lock_guard<std::mutex> lock(m_statesMutex);
-				m_threadStates[threadId].currentTask =
-					"Task started at " +
-					std::to_string(
-						std::chrono::system_clock::now()
-						.time_since_epoch()
-						.count()
-					);
-			}
-
-			task();
-
-			{
-				std::lock_guard<std::mutex> lock(m_statesMutex);
-				m_threadStates[threadId].currentTask = "idle";
-			}
-			};
-
-		m_tasks.pushFront(std::move(wrappedTask));
-#else
-		m_tasks.pushFront(std::move(task));
-#endif
 	}
 
 	/**
