@@ -35,6 +35,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\MultiThreading\Console.cpp" />
     <ClCompile Include="src\Mathematics\Common.cpp" />
     <ClCompile Include="src\Mathematics\PerlinNoise2d.cpp" />
     <ClCompile Include="src\Mathematics\PerlinNoise3d.cpp" />
@@ -50,6 +51,8 @@
     <ClCompile Include="src\Utilities\Functions.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\PlatformAbstractions\ErrorMapper.h" />
+    <ClInclude Include="include\MultiThreading\Console.h" />
     <ClInclude Include="include\Mathematics\Common.h" />
     <ClInclude Include="include\Mathematics\PerlinNoise2d.h" />
     <ClInclude Include="include\Mathematics\PerlinNoise3d.h" />
@@ -81,6 +84,7 @@
     <ClInclude Include="include\Utilities\RollingWindow.h" />
     <ClInclude Include="include\Utilities\SampleTracker.h" />
     <ClInclude Include="include\Utilities\SortedVector.h" />
+    <ClInclude Include="include\Utilities\StringConversions.h" />
     <ClInclude Include="include\Utilities\UniqueOrderedQueue.h" />
     <ClInclude Include="include\Utilities\Vector3d.h" />
     <ClInclude Include="include\Utilities\VectorNd.h" />
