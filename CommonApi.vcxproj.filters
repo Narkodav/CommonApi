@@ -54,7 +54,7 @@
     <ClCompile Include="src\MultiThreading\WeakPointer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MultiThreading\Console.cpp">
+    <ClCompile Include="src\PlatformAbstractions\Console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -173,13 +173,16 @@
     <ClInclude Include="include\Utilities\MeyersSingleton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\MultiThreading\Console.h">
+    <ClInclude Include="include\PlatformAbstractions\Console.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\PlatformAbstractions\ErrorMapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Utilities\StringConversions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PlatformAbstractions\ErrorMapper.cpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

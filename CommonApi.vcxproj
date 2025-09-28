@@ -35,7 +35,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\MultiThreading\Console.cpp" />
+    <ClCompile Include="src\PlatformAbstractions\Console.cpp" />
     <ClCompile Include="src\Mathematics\Common.cpp" />
     <ClCompile Include="src\Mathematics\PerlinNoise2d.cpp" />
     <ClCompile Include="src\Mathematics\PerlinNoise3d.cpp" />
@@ -52,7 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\PlatformAbstractions\ErrorMapper.h" />
-    <ClInclude Include="include\MultiThreading\Console.h" />
+    <ClInclude Include="include\PlatformAbstractions\Console.h" />
     <ClInclude Include="include\Mathematics\Common.h" />
     <ClInclude Include="include\Mathematics\PerlinNoise2d.h" />
     <ClInclude Include="include\Mathematics\PerlinNoise3d.h" />
@@ -92,6 +92,7 @@
     <ClInclude Include="include\MultiThreading\UniquePointer.h" />
     <ClInclude Include="include\MultiThreading\WeakPointer.h" />
     <ClInclude Include="include\Utilities\MeyersSingleton.h" />
+    <ClInclude Include="src\PlatformAbstractions\ErrorMapper.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

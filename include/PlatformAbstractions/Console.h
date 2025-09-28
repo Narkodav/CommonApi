@@ -11,12 +11,6 @@
 #include <stdexcept>
 #include <format>
 
-#ifdef _WIN32
-#include <windows.h>
-#else 
-#include <unistd.h>
-#endif
-
 namespace MultiThreading
 {
 	class ConsoleException : public std::runtime_error {
@@ -46,18 +40,11 @@ namespace MultiThreading
 	private:
 
 #ifdef _WIN32
-		static inline const std::array<HANDLE, static_cast<size_t>(CallType::Num)> s_handles = {
-		GetStdHandle(STD_INPUT_HANDLE),
-		GetStdHandle(STD_OUTPUT_HANDLE),
-		GetStdHandle(STD_ERROR_HANDLE),
-		};
-#else 
-		static inline const std::array<int, static_cast<size_t>(CallType::Num)> s_handles = {
-		STDIN_FILENO,
-		STDOUT_FILENO,
-		STDERR_FILENO,
-		};
+		using HandleType = void*;
+#else
+		using HandleType = int;
 #endif
+		static const std::array<HandleType, static_cast<size_t>(CallType::Num)> s_handles;
 
 		std::mutex m_mutex; //one mutex to preserve write order
 		std::string m_buff;
