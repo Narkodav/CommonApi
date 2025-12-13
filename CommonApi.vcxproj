@@ -76,13 +76,17 @@
     <ClInclude Include="include\Physics\RayCasting.h" />
     <ClInclude Include="include\Utilities\ArrayNd.h" />
     <ClInclude Include="include\Utilities\BinPacker.h" />
+    <ClInclude Include="include\Utilities\EventSystem.h" />
+    <ClInclude Include="include\Utilities\EventSystemConcept.h" />
     <ClInclude Include="include\Utilities\Flag.h" />
     <ClInclude Include="include\Utilities\Functions.h" />
     <ClInclude Include="include\Utilities\GridContext.h" />
+    <ClInclude Include="include\Utilities\MultiEventSystem.h" />
     <ClInclude Include="include\Utilities\PathFinder.h" />
     <ClInclude Include="include\Utilities\PathFinderContext.h" />
     <ClInclude Include="include\Utilities\RollingWindow.h" />
     <ClInclude Include="include\Utilities\SampleTracker.h" />
+    <ClInclude Include="include\Utilities\ScopedEventSystem.h" />
     <ClInclude Include="include\Utilities\SortedVector.h" />
     <ClInclude Include="include\Utilities\StringConversions.h" />
     <ClInclude Include="include\Utilities\UniqueOrderedQueue.h" />

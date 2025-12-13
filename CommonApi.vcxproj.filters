@@ -185,5 +185,17 @@
     <ClInclude Include="src\PlatformAbstractions\ErrorMapper.cpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Utilities\ScopedEventSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utilities\EventSystemConcept.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utilities\EventSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Utilities\MultiEventSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
