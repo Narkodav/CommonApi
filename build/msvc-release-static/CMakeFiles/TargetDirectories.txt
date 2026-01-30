@@ -1,0 +1,6 @@
+E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/msvc-release-static/CMakeFiles/CommonApi.dir
+E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/msvc-release-static/CMakeFiles/edit_cache.dir
+E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/msvc-release-static/CMakeFiles/rebuild_cache.dir
+E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/msvc-release-static/CMakeFiles/list_install_components.dir
+E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/msvc-release-static/CMakeFiles/install.dir
+E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/msvc-release-static/CMakeFiles/install/local.dir

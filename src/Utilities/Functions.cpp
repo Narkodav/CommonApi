@@ -7,14 +7,14 @@ namespace Utilities
         float result = 0.0f;
         float mult = 1;
         int power = 10;
-        int i = start;
+        size_t i = start;
         if (str[start] == '-')
         {
             mult = -1;
             start++;
         }
 
-        for (i; i < str.size(); i++)
+        for (; i < str.size(); i++)
         {
             if (str[i] == '.')
                 break;
@@ -30,7 +30,7 @@ namespace Utilities
             }
         }
         i++;
-        for (i; i < str.size(); i++)
+        for (; i < str.size(); i++)
         {
             if (str[i] != endValue)
             {

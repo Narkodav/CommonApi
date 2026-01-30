@@ -1,4 +1,3 @@
-#pragma once
 #include "../../include/PlatformAbstractions/ErrorMapper.h"
 
 #ifdef _WIN32

@@ -70,7 +70,7 @@ namespace MultiThreading
         localtime_s(&timeInfo, &currentTime);
 
         std::stringstream ss;
-        ss << std::put_time(&timeInfo, "%Y-%m-%d %H:%M:%S");
+        ss << std::put_time(&timeInfo, "%Y-%m-%d %H:%M:%S") << message.message;
         return ss.str();
     }
 

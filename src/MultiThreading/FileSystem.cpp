@@ -9,9 +9,9 @@ namespace MultiThreading
         auto it = access->find(path);
         if (it == access->end())
         {
-            auto [it, inserted] =
+            auto [iter, inserted] =
             access->emplace(path, std::make_shared<std::shared_mutex>());
-            return it->second;
+            return iter->second;
         }
         return it->second;
     }
@@ -49,7 +49,7 @@ namespace MultiThreading
             }
         }
         catch (const fs::filesystem_error& e) {
-            throw;
+            throw e.what();
         }
 
         return entries;
@@ -256,6 +256,7 @@ namespace MultiThreading
         catch (const std::exception& e) {
             throw;
         }
+        return true;
     }
 
     bool FileSystem::writeFileBinary(const std::string& path,
@@ -318,5 +319,6 @@ namespace MultiThreading
         catch (const std::exception& e) {
             throw;
         }
+        return true;
     }
 }

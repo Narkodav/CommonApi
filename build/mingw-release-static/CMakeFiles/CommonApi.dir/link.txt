@@ -1,0 +1,2 @@
+A:\compilers\mingw64\bin\ar.exe qc libCommonApi.a CMakeFiles/CommonApi.dir/src/MultiThreading/FileSystem.cpp.obj CMakeFiles/CommonApi.dir/src/MultiThreading/Logger.cpp.obj CMakeFiles/CommonApi.dir/src/MultiThreading/ThreadPool.cpp.obj CMakeFiles/CommonApi.dir/src/Physics/Hitboxes.cpp.obj CMakeFiles/CommonApi.dir/src/PlatformAbstractions/Console.cpp.obj CMakeFiles/CommonApi.dir/src/PlatformAbstractions/ErrorMapper.cpp.obj CMakeFiles/CommonApi.dir/src/Utilities/Functions.cpp.obj
+A:\compilers\mingw64\bin\ranlib.exe libCommonApi.a

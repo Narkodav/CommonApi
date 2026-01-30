@@ -19,6 +19,8 @@ namespace Physics
 			return IntersectionFunctions::intersectsParallelogram(*this, thisPosition, *otherHitbox, otherPosition);
 		else if (const SphereHitbox* otherHitbox = dynamic_cast<const SphereHitbox*>(&other))
 			return IntersectionFunctions::intersectsParallelogramSphere(*this, thisPosition, *otherHitbox, otherPosition);
+		throw std::runtime_error("Hitbox type not supported");
+		return false;
 	}
 
 	Physics::RayCasting::IntersectResult ParallelogramHitbox::intersectsRay(Physics::RayCasting::Ray ray, glm::vec3 hitboxPosition) const
@@ -44,11 +46,17 @@ namespace Physics
 			return IntersectionFunctions::intersectsParallelogramCylinder(*otherHitbox, otherPosition, *this, thisPosition);
 		else if (const SphereHitbox* otherHitbox = dynamic_cast<const SphereHitbox*>(&other))
 			return IntersectionFunctions::intersectsCylinderSphere(*this, thisPosition, *otherHitbox, otherPosition);
+		throw std::runtime_error("Hitbox type not supported");
+		return false;
 	}
 
 	Physics::RayCasting::IntersectResult CylinderHitbox::intersectsRay(Physics::RayCasting::Ray ray, glm::vec3 hitboxPosition) const
 	{
-		return { 0 };
+		return {.intersects = false, 
+			.intersectionPoint = hitboxPosition, 
+			.intersectionNormal = ray.direction, 
+			.distance = 0
+		};
 	}
 
 	bool CylinderHitbox::contains(const glm::vec3& point, glm::vec3 thisPosition) const
@@ -68,11 +76,17 @@ namespace Physics
 			return IntersectionFunctions::intersectsParallelogramSphere(*otherHitbox, otherPosition, *this, thisPosition);
 		else if (const SphereHitbox* otherHitbox = dynamic_cast<const SphereHitbox*>(&other))
 			return IntersectionFunctions::intersectsSphere(*this, thisPosition, *otherHitbox, otherPosition);
+		throw std::runtime_error("Hitbox type not supported");
+		return false;
 	}
 
 	Physics::RayCasting::IntersectResult SphereHitbox::intersectsRay(Physics::RayCasting::Ray ray, glm::vec3 hitboxPosition) const
 	{
-		return { 0 };
+		return {.intersects = false, 
+			.intersectionPoint = hitboxPosition, 
+			.intersectionNormal = ray.direction, 
+			.distance = 0
+		};
 	}
 
 	bool SphereHitbox::contains(const glm::vec3& point, glm::vec3 thisPosition) const
@@ -184,7 +198,7 @@ namespace Physics
 
 	bool CompoundHitbox::intersects(const Hitbox& other, glm::vec3 thisPosition, glm::vec3 otherPosition) const
 	{
-		for (int i = 0; i < m_hitboxes.size(); i++)
+		for (size_t i = 0; i < m_hitboxes.size(); ++i)
 			if (m_hitboxes[i]->intersects(other, thisPosition + m_positions[i], otherPosition))
 				return 1;
 		return 0;
@@ -193,10 +207,10 @@ namespace Physics
 	Physics::RayCasting::IntersectResult CompoundHitbox::intersectsRay(Physics::RayCasting::Ray ray, glm::vec3 hitboxPosition) const
 	{
 		Physics::RayCasting::IntersectResult buffer;
-		Physics::RayCasting::IntersectResult final = { 0 };
+		Physics::RayCasting::IntersectResult final = { 0, glm::vec3(0), glm::vec3(0), 0 };
 		float minDistance = INFINITY;
 
-		for (int i = 0; i < m_hitboxes.size(); i++)
+		for (size_t i = 0; i < m_hitboxes.size(); i++)
 		{
 			buffer = m_hitboxes[i]->intersectsRay(ray, hitboxPosition + m_positions[i]);
 			if (buffer.intersects && buffer.distance < minDistance)
@@ -208,7 +222,7 @@ namespace Physics
 
 	bool CompoundHitbox::contains(const glm::vec3& point, glm::vec3 thisPosition) const
 	{
-		for (int i = 0; i < m_hitboxes.size(); i++)
+		for (size_t i = 0; i < m_hitboxes.size(); i++)
 			if (m_hitboxes[i]->contains(point, thisPosition + m_positions[i]))
 				return 1;
 		return 0;
@@ -220,13 +234,14 @@ namespace Physics
 			return std::make_unique<ParallelogramHitbox>(params[0], params[1], params[2]);
 		else if (type == Hitbox::hitboxTypes[static_cast<unsigned int>(Hitbox::HitboxTypes::HITBOX_CYLINDER)])
 			return std::make_unique<CylinderHitbox>(params[0], params[1]);
+		return nullptr;
 	}
 
 	std::unique_ptr<Hitbox> HitboxFactory::createHitbox(const std::vector<std::string>& types, const std::vector<float>& params, const std::vector<glm::vec3>& positions)
 	{
 		std::unique_ptr<CompoundHitbox> hitbox = std::make_unique<CompoundHitbox>();
 		unsigned int currentParamBord = 0;
-		for (int i = 0; i < types.size(); i++)
+		for (size_t i = 0; i < types.size(); i++)
 		{
 			if (types[i] == Hitbox::hitboxTypes[static_cast<unsigned int>(Hitbox::HitboxTypes::HITBOX_PARALLELOGRAM)])
 			{

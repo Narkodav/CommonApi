@@ -78,6 +78,11 @@
     <ClInclude Include="include\Utilities\BinPacker.h" />
     <ClInclude Include="include\Utilities\EventSystem.h" />
     <ClInclude Include="include\Utilities\EventSystemConcept.h" />
+    <ClInclude Include="include\Utilities\EventSystems\EventSystem.h" />
+    <ClInclude Include="include\Utilities\EventSystems\EventSystemConcept.h" />
+    <ClInclude Include="include\Utilities\EventSystems\MultiEventSystem.h" />
+    <ClInclude Include="include\Utilities\EventSystems\ScopedEventSystem.h" />
+    <ClInclude Include="include\Utilities\EventSystems\SingleCallbackEventSystem.h" />
     <ClInclude Include="include\Utilities\Flag.h" />
     <ClInclude Include="include\Utilities\Functions.h" />
     <ClInclude Include="include\Utilities\GridContext.h" />

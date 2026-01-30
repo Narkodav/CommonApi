@@ -2,9 +2,9 @@
 
 namespace MultiThreading
 {
-	const unsigned int ThreadPool::THREAD_POOL_MAX_THREADS = std::thread::hardware_concurrency() * 4;
+	const size_t ThreadPool::THREAD_POOL_MAX_THREADS = std::thread::hardware_concurrency() * 4;
 
-	void ThreadPool::init(int numThreads)
+	void ThreadPool::init(size_t numThreads)
 	{
 		if (m_active.load())
 			shutdown();
@@ -18,7 +18,7 @@ namespace MultiThreading
 		m_activeFlags.resize(numThreads);
 		m_workerCount = numThreads;
 
-		for (int i = 0; i < numThreads; i++)
+		for (size_t i = 0; i < numThreads; ++i)
 		{
 			m_activeFlags[i] = true;
 			m_workerThreads.emplace_back(&ThreadPool::workerLoop, this, i);
@@ -164,7 +164,7 @@ namespace MultiThreading
 	{
 		std::lock_guard<std::mutex> lock(m_taskSubmissionMutex);
 		std::vector<std::thread::id> ids;
-		for (int i = 0; i < m_workerCount; i++)
+		for (size_t i = 0; i < m_workerCount; ++i)
 			ids.emplace_back(m_workerThreads[i].get_id());
 
 		return ids;
