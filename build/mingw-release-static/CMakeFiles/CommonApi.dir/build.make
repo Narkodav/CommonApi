@@ -173,6 +173,21 @@ CMakeFiles/CommonApi.dir/src/Utilities/Functions.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CommonApi.dir/src/Utilities/Functions.cpp.s"
 	A:\compilers\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "E:\Program Files (x86)\Code\C_code\libraries\CommonApi\src\Utilities\Functions.cpp" -o CMakeFiles\CommonApi.dir\src\Utilities\Functions.cpp.s
 
+CMakeFiles/CommonApi.dir/src/test.cpp.obj: CMakeFiles/CommonApi.dir/flags.make
+CMakeFiles/CommonApi.dir/src/test.cpp.obj: CMakeFiles/CommonApi.dir/includes_CXX.rsp
+CMakeFiles/CommonApi.dir/src/test.cpp.obj: E:/Program\ Files\ (x86)/Code/C_code/libraries/CommonApi/src/test.cpp
+CMakeFiles/CommonApi.dir/src/test.cpp.obj: CMakeFiles/CommonApi.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="E:\Program Files (x86)\Code\C_code\libraries\CommonApi\build\mingw-release-static\CMakeFiles" --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/CommonApi.dir/src/test.cpp.obj"
+	A:\compilers\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/CommonApi.dir/src/test.cpp.obj -MF CMakeFiles\CommonApi.dir\src\test.cpp.obj.d -o CMakeFiles\CommonApi.dir\src\test.cpp.obj -c "E:\Program Files (x86)\Code\C_code\libraries\CommonApi\src\test.cpp"
+
+CMakeFiles/CommonApi.dir/src/test.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/CommonApi.dir/src/test.cpp.i"
+	A:\compilers\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "E:\Program Files (x86)\Code\C_code\libraries\CommonApi\src\test.cpp" > CMakeFiles\CommonApi.dir\src\test.cpp.i
+
+CMakeFiles/CommonApi.dir/src/test.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/CommonApi.dir/src/test.cpp.s"
+	A:\compilers\mingw64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "E:\Program Files (x86)\Code\C_code\libraries\CommonApi\src\test.cpp" -o CMakeFiles\CommonApi.dir\src\test.cpp.s
+
 # Object files for target CommonApi
 CommonApi_OBJECTS = \
 "CMakeFiles/CommonApi.dir/src/MultiThreading/FileSystem.cpp.obj" \
@@ -181,7 +196,8 @@ CommonApi_OBJECTS = \
 "CMakeFiles/CommonApi.dir/src/Physics/Hitboxes.cpp.obj" \
 "CMakeFiles/CommonApi.dir/src/PlatformAbstractions/Console.cpp.obj" \
 "CMakeFiles/CommonApi.dir/src/PlatformAbstractions/ErrorMapper.cpp.obj" \
-"CMakeFiles/CommonApi.dir/src/Utilities/Functions.cpp.obj"
+"CMakeFiles/CommonApi.dir/src/Utilities/Functions.cpp.obj" \
+"CMakeFiles/CommonApi.dir/src/test.cpp.obj"
 
 # External object files for target CommonApi
 CommonApi_EXTERNAL_OBJECTS =
@@ -193,9 +209,10 @@ libCommonApi.a: CMakeFiles/CommonApi.dir/src/Physics/Hitboxes.cpp.obj
 libCommonApi.a: CMakeFiles/CommonApi.dir/src/PlatformAbstractions/Console.cpp.obj
 libCommonApi.a: CMakeFiles/CommonApi.dir/src/PlatformAbstractions/ErrorMapper.cpp.obj
 libCommonApi.a: CMakeFiles/CommonApi.dir/src/Utilities/Functions.cpp.obj
+libCommonApi.a: CMakeFiles/CommonApi.dir/src/test.cpp.obj
 libCommonApi.a: CMakeFiles/CommonApi.dir/build.make
 libCommonApi.a: CMakeFiles/CommonApi.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir="E:\Program Files (x86)\Code\C_code\libraries\CommonApi\build\mingw-release-static\CMakeFiles" --progress-num=$(CMAKE_PROGRESS_8) "Linking CXX static library libCommonApi.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir="E:\Program Files (x86)\Code\C_code\libraries\CommonApi\build\mingw-release-static\CMakeFiles" --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX static library libCommonApi.a"
 	$(CMAKE_COMMAND) -P CMakeFiles\CommonApi.dir\cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\CommonApi.dir\link.txt --verbose=$(VERBOSE)
 

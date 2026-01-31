@@ -46,3 +46,6 @@ E:/Program Files (x86)/Code/C_code/libraries/CommonApi/install/mingw-debug-stati
 E:/Program Files (x86)/Code/C_code/libraries/CommonApi/install/mingw-debug-static/include/Utilities/UniqueOrderedQueue.h
 E:/Program Files (x86)/Code/C_code/libraries/CommonApi/install/mingw-debug-static/include/Utilities/Vector3d.h
 E:/Program Files (x86)/Code/C_code/libraries/CommonApi/install/mingw-debug-static/include/Utilities/VectorNd.h
+E:/Program Files (x86)/Code/C_code/libraries/CommonApi/install/mingw-debug-static/lib/cmake/CommonApi/CommonApiTargets.cmake
+E:/Program Files (x86)/Code/C_code/libraries/CommonApi/install/mingw-debug-static/lib/cmake/CommonApi/CommonApiTargets-debug.cmake
+E:/Program Files (x86)/Code/C_code/libraries/CommonApi/install/mingw-debug-static/lib/cmake/CommonApi/CommonApiConfig.cmake

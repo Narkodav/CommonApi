@@ -14,23 +14,23 @@
 
 namespace Utilities {
 
+	template<typename... Ts>
+	struct HasDuplicates;
+
+	template<>
+	struct HasDuplicates<> : std::false_type {};
+
+	template<typename T, typename... Rest>
+	struct HasDuplicates<T, Rest...> :
+		std::bool_constant<
+		(std::is_same_v<T, Rest> || ...) ||
+		HasDuplicates<Rest...>::value> {
+	};
+
 	template<template <typename Policy> typename EventSystemT, EventSystemPolicy... Policies>
 	class MultiEventSystem
 	{
 	private:
-
-		template<typename... Ts>
-		struct HasDuplicates;
-
-		template<>
-		struct HasDuplicates<> : std::false_type {};
-
-		template<typename T, typename... Rest>
-		struct HasDuplicates<T, Rest...> :
-			std::bool_constant<
-			(std::is_same_v<T, Rest> || ...) ||
-			HasDuplicates<Rest...>::value> {
-		};
 
 		static_assert(!HasDuplicates<Policies...>::value,
 			"Duplicate policies are not allowed in MultiEventSystem");
@@ -85,33 +85,33 @@ namespace Utilities {
 
 		template<auto T, typename... Args>
 		const MultiEventSystem& emit(Args&&... args) const {
-			findEventSystem<decltype(T)>().emit<T>(std::forward<Args>(args)...);
+			findEventSystem<decltype(T)>().template emit<T>(std::forward<Args>(args)...);
 			return *this;
 		}
 
 		template<auto T>
 		auto subscribe(auto&& callback)
 			requires(s_eventSystemType == EventSystemType::Default) {
-			return findEventSystem<decltype(T)>().subscribe<T>(callback);
+			return findEventSystem<decltype(T)>().template subscribe<T>(callback);
 		};
 
 		template<auto T, typename Handler>
 		auto subscribe(auto&& callback, Handler& handler)
 			requires(s_eventSystemType == EventSystemType::Default) {
-			return findEventSystem<decltype(T)>().subscribe<T>(callback, handler);
+			return findEventSystem<decltype(T)>().template subscribe<T>(callback, handler);
 		};
 
 		template<auto T>
 		MultiEventSystem& subscribe(auto&& callback)
 			requires(s_eventSystemType == EventSystemType::Scoped) {
-			findEventSystem<decltype(T)>().subscribe<T>(callback);
+			findEventSystem<decltype(T)>().template subscribe<T>(callback);
 			return *this;
 		};
 
 		template<auto T, typename Handler>
 		MultiEventSystem& subscribe(auto&& callback, Handler& handler)
 			requires(s_eventSystemType == EventSystemType::Scoped) {
-			findEventSystem<decltype(T)>().subscribe<T>(callback, handler);
+			findEventSystem<decltype(T)>().template subscribe<T>(callback, handler);
 			return *this;
 		};
 
@@ -126,21 +126,21 @@ namespace Utilities {
 		template<auto T>
 		MultiEventSystem& clear()
 			requires(s_eventSystemType == EventSystemType::SingleCallback) {
-			findEventSystem<decltype(T)>().clear<T>();
+			findEventSystem<decltype(T)>().template clear<T>();
 			return *this;
 		}
 
 		template<auto T>
 		MultiEventSystem& set(auto&& callback)
 			requires(s_eventSystemType == EventSystemType::SingleCallback) {
-			findEventSystem<decltype(T)>().set<T>(callback);
+			findEventSystem<decltype(T)>().template set<T>(callback);
 			return *this;
 		}
 
 		template<auto T, typename Handler>
 		MultiEventSystem& set(auto&& callback, Handler& handler)
 			requires(s_eventSystemType == EventSystemType::SingleCallback) {
-			findEventSystem<decltype(T)>().set<T>(callback, handler);
+			findEventSystem<decltype(T)>().template set<T>(callback, handler);
 			return *this;
 		}
 	};

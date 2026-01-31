@@ -13,6 +13,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/CommonApi.dir/src/PlatformAbstractions/ErrorMapper.cpp.obj.d"
   "CMakeFiles/CommonApi.dir/src/Utilities/Functions.cpp.obj"
   "CMakeFiles/CommonApi.dir/src/Utilities/Functions.cpp.obj.d"
+  "CMakeFiles/CommonApi.dir/src/test.cpp.obj"
+  "CMakeFiles/CommonApi.dir/src/test.cpp.obj.d"
   "libCommonApi.a"
   "libCommonApi.pdb"
 )

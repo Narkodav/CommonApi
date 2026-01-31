@@ -15,6 +15,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/share/cmake-3.30/Modules/CMakeGenericSystem.cmake"
   "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/share/cmake-3.30/Modules/CMakeInitializeConfigs.cmake"
   "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/share/cmake-3.30/Modules/CMakeLanguageInformation.cmake"
+  "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/share/cmake-3.30/Modules/CMakePackageConfigHelpers.cmake"
   "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/share/cmake-3.30/Modules/CMakeRCInformation.cmake"
   "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/share/cmake-3.30/Modules/CMakeSystemSpecificInformation.cmake"
   "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/share/cmake-3.30/Modules/CMakeSystemSpecificInitialize.cmake"
@@ -31,11 +32,13 @@ set(CMAKE_MAKEFILE_DEPENDS
   "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/share/cmake-3.30/Modules/Platform/Windows-windres.cmake"
   "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/share/cmake-3.30/Modules/Platform/Windows.cmake"
   "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/share/cmake-3.30/Modules/Platform/WindowsPaths.cmake"
+  "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/share/cmake-3.30/Modules/WriteBasicConfigVersionFile.cmake"
   "E:/Program Files (x86)/Code/C_code/libraries/CommonApi/CMakeLists.txt"
   "CMakeFiles/3.30.2/CMakeCCompiler.cmake"
   "CMakeFiles/3.30.2/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.30.2/CMakeRCCompiler.cmake"
   "CMakeFiles/3.30.2/CMakeSystem.cmake"
+  "E:/Program Files (x86)/Code/C_code/libraries/CommonApi/install/CommonApiConfig.cmake.in"
   )
 
 # The corresponding makefile is:
@@ -46,6 +49,7 @@ set(CMAKE_MAKEFILE_OUTPUTS
 
 # Byproducts of CMake generate step:
 set(CMAKE_MAKEFILE_PRODUCTS
+  "CommonApiConfig.cmake"
   "CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 

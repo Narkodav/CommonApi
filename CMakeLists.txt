@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 file(GLOB SRC_FILES
+    ${CMAKE_SOURCE_DIR}/src/*.cpp
     ${CMAKE_SOURCE_DIR}/src/**/*.cpp
 )
 
@@ -67,4 +68,23 @@ install(TARGETS ${PROJECT_NAME}
 
 install(DIRECTORY include/
     DESTINATION include
+)
+
+install(EXPORT CommonApiTargets
+    FILE CommonApiTargets.cmake
+    NAMESPACE CommonApi::
+    DESTINATION lib/cmake/CommonApi
+)
+
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+    ${CMAKE_SOURCE_DIR}/install/CommonApiConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/CommonApiConfig.cmake
+    INSTALL_DESTINATION lib/cmake/CommonApi
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/CommonApiConfig.cmake
+    DESTINATION lib/cmake/CommonApi
 )

@@ -46,3 +46,6 @@ E:/Program Files (x86)/Code/C_code/libraries/CommonApi/install/mingw-release-sta
 E:/Program Files (x86)/Code/C_code/libraries/CommonApi/install/mingw-release-static/include/Utilities/UniqueOrderedQueue.h
 E:/Program Files (x86)/Code/C_code/libraries/CommonApi/install/mingw-release-static/include/Utilities/Vector3d.h
 E:/Program Files (x86)/Code/C_code/libraries/CommonApi/install/mingw-release-static/include/Utilities/VectorNd.h
+E:/Program Files (x86)/Code/C_code/libraries/CommonApi/install/mingw-release-static/lib/cmake/CommonApi/CommonApiTargets.cmake
+E:/Program Files (x86)/Code/C_code/libraries/CommonApi/install/mingw-release-static/lib/cmake/CommonApi/CommonApiTargets-release.cmake
+E:/Program Files (x86)/Code/C_code/libraries/CommonApi/install/mingw-release-static/lib/cmake/CommonApi/CommonApiConfig.cmake
