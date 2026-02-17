@@ -1,4 +1,0 @@
-# ninja log v5
-22	1501	7915185226443227	CMakeFiles/CommonApi.dir/src/PlatformAbstractions/ErrorMapper.cpp.obj	92ea2259d80afead
-19	2055	7915185231974317	CMakeFiles/CommonApi.dir/src/PlatformAbstractions/Console.cpp.obj	829e6e492e3bf907
-7	2539	7915185236822427	CMakeFiles/CommonApi.dir/src/MultiThreading/Logger.cpp.obj	33153349a785583

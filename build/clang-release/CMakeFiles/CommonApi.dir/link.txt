@@ -1,0 +1,2 @@
+C:\Users\user\.utils\llvm-mingw\bin\llvm-ar.exe qc libCommonApi.a CMakeFiles/CommonApi.dir/src/MultiThreading/FileSystem.cpp.obj CMakeFiles/CommonApi.dir/src/MultiThreading/Logger.cpp.obj CMakeFiles/CommonApi.dir/src/MultiThreading/ThreadPool.cpp.obj CMakeFiles/CommonApi.dir/src/Physics/Hitboxes.cpp.obj CMakeFiles/CommonApi.dir/src/PlatformAbstractions/Console.cpp.obj CMakeFiles/CommonApi.dir/src/PlatformAbstractions/ErrorMapper.cpp.obj CMakeFiles/CommonApi.dir/src/Utilities/Functions.cpp.obj
+C:\Users\user\.utils\llvm-mingw\bin\llvm-ranlib.exe libCommonApi.a

@@ -1,0 +1,12 @@
+# ninja log v5
+26	1393	7930641660841158	CMakeFiles/CommonApi.dir/src/Utilities/Functions.cpp.obj	ebe3c930527a5a1a
+13	2021	7930641667127334	CMakeFiles/CommonApi.dir/src/Physics/Hitboxes.cpp.obj	ceec792012840939
+2	3046	7930641677388812	CMakeFiles/CommonApi.dir/src/MultiThreading/FileSystem.cpp.obj	de28779ec4226161
+22	1582	7930641662726751	CMakeFiles/CommonApi.dir/src/PlatformAbstractions/ErrorMapper.cpp.obj	fa3ee748849ac6f3
+31	2230	7930641669213400	CMakeFiles/CommonApiTests.dir/tests/test.cpp.obj	830efef47df6cc17
+7	2672	7930641673626472	CMakeFiles/CommonApi.dir/src/MultiThreading/Logger.cpp.obj	8cf249fca92ba974
+17	2789	7930641674812694	CMakeFiles/CommonApi.dir/src/PlatformAbstractions/Console.cpp.obj	2845167bd066f0d3
+10	2802	7930641674922699	CMakeFiles/CommonApi.dir/src/MultiThreading/ThreadPool.cpp.obj	110b14efada421f0
+3047	3169	7930641677908844	CommonApi.lib	c044a3a05ef48558
+3169	3320	7930641679755138	CommonApiTests.exe	1c063e644a8a4c02
+3320	3863	0	CMakeFiles/install.util	e11d8c598b152cc1

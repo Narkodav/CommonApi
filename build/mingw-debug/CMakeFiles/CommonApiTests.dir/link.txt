@@ -1,0 +1,3 @@
+"E:\Program Files (x86)\CMake\cmake-3.30.2-windows-x86_64\bin\cmake.exe" -E rm -f CMakeFiles\CommonApiTests.dir/objects.a
+A:\compilers\mingw64\bin\ar.exe qc CMakeFiles\CommonApiTests.dir/objects.a @CMakeFiles\CommonApiTests.dir\objects1.rsp
+A:\compilers\mingw64\bin\g++.exe -g -Wl,--whole-archive CMakeFiles\CommonApiTests.dir/objects.a -Wl,--no-whole-archive -o CommonApiTests.exe -Wl,--out-implib,libCommonApiTests.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\CommonApiTests.dir\linkLibs.rsp

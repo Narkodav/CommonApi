@@ -1,9 +1,7 @@
-#include "../../include/MultiThreading/ThreadPool.h"
+#include "MultiThreading/ThreadPool.h"
 
 namespace MultiThreading
 {
-	const size_t ThreadPool::THREAD_POOL_MAX_THREADS = std::thread::hardware_concurrency() * 4;
-
 	void ThreadPool::init(size_t numThreads)
 	{
 		if (m_active.load())
@@ -34,7 +32,7 @@ namespace MultiThreading
 
 	void ThreadPool::workerLoop(size_t threadIndex)
 	{
-#ifdef _DEBUG
+#ifndef NODEBUG
 		ThreadInfo info{ std::this_thread::get_id(), "initializing",
 						  std::chrono::steady_clock::now(), nullptr };
 		{
@@ -50,18 +48,18 @@ namespace MultiThreading
 		{
 			m_poolFinished.notify_one();
 			if (!m_activeFlags[threadIndex]) {
-#ifdef _DEBUG
+#ifndef NODEBUG
 				logThreadState("exiting");
 #endif
 				break;  // Exit the thread
 			}
-#ifdef _DEBUG
+#ifndef NODEBUG
 			logThreadState("waiting for task");
 #endif
 			if (m_tasks.waitAndPopFrontFor(task, std::chrono::milliseconds(100)))
 			{
 				m_freeWorkers--;
-#ifdef _DEBUG
+#ifndef NODEBUG
 				logThreadState("executing task");
 				try {
 					task(threadIndex);
@@ -86,7 +84,7 @@ namespace MultiThreading
 
 	void ThreadPool::shutdown() //safely exits
 	{
-		auto lock = waitForAllAndPause();
+		auto lock = pausePool();
 		m_active.store(0);
 		if (!m_workerThreads.size())
 			return;
@@ -129,8 +127,8 @@ namespace MultiThreading
 			return;
 		}
 
-		if (newSize > THREAD_POOL_MAX_THREADS)
-			newSize = THREAD_POOL_MAX_THREADS;
+		if (newSize > s_threadPoolMaxThreads)
+			newSize = s_threadPoolMaxThreads;
 
 		if (!m_active.load())
 		{

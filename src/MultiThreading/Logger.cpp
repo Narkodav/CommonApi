@@ -1,4 +1,4 @@
-#include "../../include/MultiThreading/Logger.h"
+#include "MultiThreading/Logger.h"
 
 namespace MultiThreading
 {

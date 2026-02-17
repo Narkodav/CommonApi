@@ -1,4 +1,4 @@
-#include "../../include/Physics/Hitboxes.h"
+#include "Physics/Hitboxes.h"
 
 namespace Physics
 {

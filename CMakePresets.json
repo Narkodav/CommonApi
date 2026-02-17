@@ -5,111 +5,77 @@
         "minor": 21,
         "patch": 0
     },
-
     "configurePresets": [
         {
-            "name": "mingw-debug-static",
-            "displayName": "MinGW Debug static",
+            "name": "clang-debug",
+            "displayName": "Clang Debug",
             "generator": "MinGW Makefiles",
-            "binaryDir": "${sourceDir}/build/mingw-debug-static",
+            "binaryDir": "${sourceDir}/build/clang-debug",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "C:/Users/user/.utils/llvm-mingw/bin/clang.exe",
+                "CMAKE_CXX_COMPILER": "C:/Users/user/.utils/llvm-mingw/bin/clang++.exe",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/clang-debug"
+            }
+        },
+        {
+            "name": "clang-release",
+            "displayName": "Clang Release",
+            "generator": "MinGW Makefiles",
+            "binaryDir": "${sourceDir}/build/clang-release",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "C:/Users/user/.utils/llvm-mingw/bin/clang.exe",
+                "CMAKE_CXX_COMPILER": "C:/Users/user/.utils/llvm-mingw/bin/clang++.exe",
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/clang-release"
+            }
+        },
+        {
+            "name": "mingw-debug",
+            "displayName": "MinGW Debug",
+            "generator": "MinGW Makefiles",
+            "binaryDir": "${sourceDir}/build/mingw-debug",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "A:/compilers/mingw64/bin/gcc.exe",
                 "CMAKE_CXX_COMPILER": "A:/compilers/mingw64/bin/g++.exe",
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/mingw-debug-static",
-                "BUILD_SHARED_LIBS": false
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/mingw-debug"
             }
         },
         {
-            "name": "mingw-release-static",
-            "displayName": "MinGW Release static",
+            "name": "mingw-release",
+            "displayName": "MinGW Release",
             "generator": "MinGW Makefiles",
-            "binaryDir": "${sourceDir}/build/mingw-release-static",
+            "binaryDir": "${sourceDir}/build/mingw-release",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "A:/compilers/mingw64/bin/gcc.exe",
                 "CMAKE_CXX_COMPILER": "A:/compilers/mingw64/bin/g++.exe",
                 "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/mingw-release-static",
-                "BUILD_SHARED_LIBS": false
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/mingw-release"
             }
         },
         {
-            "name": "msvc-debug-static",
-            "displayName": "MSVC Debug (Ninja) static",
+            "name": "msvc-debug",
+            "displayName": "MSVC Debug (Ninja)",
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/msvc-debug-static",
+            "binaryDir": "${sourceDir}/build/msvc-debug",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "cl.exe",
                 "CMAKE_CXX_COMPILER": "cl.exe",
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/msvc-debug-static",
-                "BUILD_SHARED_LIBS": false
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/msvc-debug"
             }
         },
         {
-            "name": "msvc-release-static",
-            "displayName": "MSVC Release (Ninja) static",
+            "name": "msvc-release",
+            "displayName": "MSVC Release (Ninja)",
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/msvc-release-static",
+            "binaryDir": "${sourceDir}/build/msvc-release",
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "cl.exe",
                 "CMAKE_CXX_COMPILER": "cl.exe",
                 "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/msvc-release-static",
-                "BUILD_SHARED_LIBS": false
-            }
-        },
-
-        {
-            "name": "mingw-debug-shared",
-            "displayName": "MinGW Debug shared",
-            "generator": "MinGW Makefiles",
-            "binaryDir": "${sourceDir}/build/mingw-debug-shared",
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "A:/compilers/mingw64/bin/gcc.exe",
-                "CMAKE_CXX_COMPILER": "A:/compilers/mingw64/bin/g++.exe",
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/mingw-debug-shared",
-                "BUILD_SHARED_LIBS": true
-            }
-        },
-        {
-            "name": "mingw-release-shared",
-            "displayName": "MinGW Release shared",
-            "generator": "MinGW Makefiles",
-            "binaryDir": "${sourceDir}/build/mingw-release-shared",
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "A:/compilers/mingw64/bin/gcc.exe",
-                "CMAKE_CXX_COMPILER": "A:/compilers/mingw64/bin/g++.exe",
-                "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/mingw-release-shared",
-                "BUILD_SHARED_LIBS": true
-            }
-        },
-        {
-            "name": "msvc-debug-shared",
-            "displayName": "MSVC Debug (Ninja) shared",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/msvc-debug-shared",
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "cl.exe",
-                "CMAKE_CXX_COMPILER": "cl.exe",
-                "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/msvc-debug-shared",
-                "BUILD_SHARED_LIBS": true
-            }
-        },
-        {
-            "name": "msvc-release-shared",
-            "displayName": "MSVC Release (Ninja) shared",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/msvc-release-shared",
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "cl.exe",
-                "CMAKE_CXX_COMPILER": "cl.exe",
-                "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/msvc-release-shared",
-                "BUILD_SHARED_LIBS": true
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/msvc-release"
             }
         }
     ]

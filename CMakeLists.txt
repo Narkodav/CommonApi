@@ -1,65 +1,84 @@
-set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS ON CACHE BOOL "" FORCE)
-cmake_minimum_required(VERSION 3.10)
-project(CommonApi)
+cmake_minimum_required(VERSION 3.20)
+project(CommonApi LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-file(GLOB SRC_FILES
-    ${CMAKE_SOURCE_DIR}/src/*.cpp
-    ${CMAKE_SOURCE_DIR}/src/**/*.cpp
+# =========================
+# Source files for library
+# =========================
+file(GLOB_RECURSE SRC_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
 
-option(BUILD_SHARED_LIBS "Build shared library" ON)
+option(COMMONAPI_BUILD_SHARED "Build CommonApi as a shared library" OFF)
 
-# Add executable
-add_library(${PROJECT_NAME}
-    ${SRC_FILES}
-)
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(${PROJECT_NAME} PRIVATE
-        -Wall -Wextra -Wpedantic -Werror
-    )
-elseif (MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE
-        /W4 /WX
-    )
+# =========================
+# Library target
+# =========================
+if(COMMONAPI_BUILD_SHARED)
+    add_library(${PROJECT_NAME} SHARED ${SRC_FILES})
+else()
+    add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
 endif()
 
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+add_library(CommonApi::CommonApi ALIAS ${PROJECT_NAME})
 
-target_compile_definitions(${PROJECT_NAME}
-    PRIVATE COMMON_API_EXPORTS
+# C++20 and warnings
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+target_compile_options(${PROJECT_NAME} PRIVATE
+    $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>
+    $<$<CXX_COMPILER_ID:MSVC>:/W4>
 )
+
+# Preprocessor definition
+target_compile_definitions(${PROJECT_NAME} PRIVATE COMMON_API_EXPORTS)
 
 # Include directories
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
 
-# Dependencies
-set(API_DIR E:/Program\ Files\ \(x86\)/API)
-set(LOCAL_API_DIR E:/Program\ Files\ \(x86\)/Code/C_code/libraries)
-message(STATUS "Api directory: ${API_DIR}")
+# =========================
+# GLM (INTERFACE library)
+# =========================
+add_library(glm INTERFACE)
+target_include_directories(glm INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glm>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(${PROJECT_NAME} PUBLIC glm)
 
-# GLM
-set(glm_DIR ${API_DIR}/glm/cmake/glm)
-find_package(glm REQUIRED)
-target_link_libraries(${PROJECT_NAME}
-    PUBLIC glm::glm
+# =========================
+# Test executable
+# =========================
+file(GLOB_RECURSE TEST_SRC_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp
 )
 
-target_include_directories(${PROJECT_NAME}
-    SYSTEM PUBLIC ${GLM_INCLUDE_DIRS}
+add_executable(CommonApiTests ${TEST_SRC_FILES})
+
+# Link the library
+target_link_libraries(CommonApiTests PRIVATE ${PROJECT_NAME})
+
+# Match C++ standard and warnings
+target_compile_features(CommonApiTests PUBLIC cxx_std_20)
+target_compile_options(CommonApiTests PRIVATE
+    $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>
+    $<$<CXX_COMPILER_ID:MSVC>:/W4>
 )
 
-message(STATUS "GLM include dirs: ${GLM_INCLUDE_DIRS}")
+target_include_directories(CommonApiTests PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
-# Install
-install(TARGETS ${PROJECT_NAME}
+# Enable CTest
+enable_testing()
+add_test(NAME CommonApiTests COMMAND CommonApiTests)
+
+# =========================
+# Install rules
+# =========================
+install(TARGETS ${PROJECT_NAME} glm
     EXPORT CommonApiTargets
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
@@ -70,6 +89,10 @@ install(DIRECTORY include/
     DESTINATION include
 )
 
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Vendor/glm/glm
+    DESTINATION include
+)
+
 install(EXPORT CommonApiTargets
     FILE CommonApiTargets.cmake
     NAMESPACE CommonApi::
@@ -77,9 +100,8 @@ install(EXPORT CommonApiTargets
 )
 
 include(CMakePackageConfigHelpers)
-
 configure_package_config_file(
-    ${CMAKE_SOURCE_DIR}/install/CommonApiConfig.cmake.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/install/CommonApiConfig.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/CommonApiConfig.cmake
     INSTALL_DESTINATION lib/cmake/CommonApi
 )
