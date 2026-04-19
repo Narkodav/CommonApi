@@ -5,7 +5,7 @@ project(CommonApi LANGUAGES CXX)
 # Source files for library
 # =========================
 file(GLOB_RECURSE SRC_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/CommonApi/*.cpp
 )
 
 option(COMMONAPI_BUILD_SHARED "Build CommonApi as a shared library" OFF)

@@ -1,5 +1,5 @@
-#include "Utilities/EventSystems/MultiEventSystem.h"
-#include "Utilities/EventSystems/SingleCallbackEventSystem.h"
+#include "CommonApi/Utilities/EventSystems/MultiEventSystem.h"
+#include "CommonApi/Utilities/EventSystems/SingleCallbackEventSystem.h"
 
 enum class WindowEvents
 {
@@ -120,11 +120,20 @@ public:
     }
 };
 
-#include "MultiThreading/ThreadPool.h"
+#include "CommonApi/MultiThreading/ThreadPools/MinimalThreadPool.h"
+#include "CommonApi/PlatformAbstractions/Console.h"
+#include "CommonApi/PlatformAbstractions/Thread.h"
+
+static inline auto& console = MT::Console::getInstance();
 
 int main() {
-    MultiThreading::ThreadPool threadPool;
-    threadPool.init(16);
+    MultiThreading::MinimalThreadPool threadPool;
+    threadPool.init(16, std::cerr);
 
+    Platform::Thread t;
 
+    t.start([](){
+        auto& console = MT::Console::getInstance();
+        console.writeLine("Hello world");
+    });
 }

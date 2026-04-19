@@ -7,8 +7,7 @@
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
             "cwd": "${workspaceFolder}",
-            "MIMode": "lldb",
-            "miDebuggerPath": "C:/Users/user/.utils/llvm-mingw/bin/lldb.exe"
+            "MIMode": "lldb"
         },
 
         {
@@ -17,8 +16,7 @@
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
             "cwd": "${workspaceFolder}",
-            "MIMode": "gdb",
-            "miDebuggerPath": "A:/compilers/mingw64/bin/gdb.exe"
+            "MIMode": "gdb"
         },
 
         {

@@ -1,7 +1,5 @@
 ﻿#pragma once
 #include "Namespaces.h"
-#include "MultiThreading/Deque.h"
-#include "MultiThreading/Vector.h"
 
 #include <thread>
 #include <string>
@@ -14,343 +12,359 @@
 #include <utility>
 #include <type_traits>
 #include <cstdint>
+#include <deque>
+#include <condition_variable>
+#include <shared_mutex>
+#include <memory>
 
 namespace MultiThreading
 {
 	class ThreadPool
 	{
 	public:
-		static inline const size_t s_threadPoolMaxThreads = std::thread::hardware_concurrency() * 4;
+		class Lock {
+			friend class ThreadPool;
+		private:
+			std::unique_lock<std::mutex> m_lock;
+			Lock(std::mutex& mutex) noexcept : m_lock(mutex) {}
 
-	private:
-#ifndef NODEBUG
-		struct ThreadInfo {
-			std::thread::id id;
-			std::string currentTask;
-			std::chrono::steady_clock::time_point lastActiveTime;
-			std::mutex* waitingOn;  // Track locked mutex
+			bool validate(std::mutex& mutex) const { return &mutex == m_lock.mutex(); }
+			
+		public:
+			Lock() noexcept = default;
+			~Lock() noexcept = default;
+			Lock(const Lock&) noexcept = delete;
+			Lock& operator=(const Lock&) noexcept = delete;
+			Lock(Lock&&) noexcept = default;
+			Lock& operator=(Lock&&) noexcept = default;
+
+			void lock() { m_lock.lock(); }
+			void unlock() { m_lock.unlock(); }
+			bool isLocked() const { return m_lock.owns_lock(); }
+
+			operator std::unique_lock<std::mutex>&() { return m_lock; }
 		};
 
-		std::map<std::thread::id, ThreadInfo> m_threadStates;
-		std::mutex m_statesMutex;
-		Vector<std::string> m_errors;
-#endif
+	private:
+		std::vector<std::thread> m_threads;
+		std::deque<std::function<void(size_t)>> m_tasks;
+		mutable std::mutex m_taskMutex;
+		std::condition_variable m_threadWakeUp;
+		std::condition_variable m_taskFinished;
+		std::condition_variable m_threadExited;
 
-		std::vector<std::thread> m_workerThreads;
-		std::atomic<unsigned int> m_workerCount = 0;
-		std::atomic<unsigned int> m_freeWorkers = 0;
-		std::atomic<unsigned int> m_activeWorkers = 0;
-		std::atomic<unsigned int> m_exited = 0;
-		Deque<std::function<void(size_t)>> m_tasks;
-		Vector<bool> m_activeFlags;
-		std::atomic<bool> m_active = 0;
-		std::mutex m_taskSubmissionMutex;
-		std::condition_variable_any m_poolFinished;
+		std::ostream* m_errorStream = nullptr;
 
-		void workerLoop(size_t threadIndex);
+		size_t m_threadAmountToRun;
+		size_t m_workingThreadCount;
+		size_t m_activeThreadCount;
 
-		template<typename Task>
-		void pushTask(Task&& task, [[maybe_unused]] std::unique_lock<std::mutex>& accessLock)
-		{
-			if constexpr (std::is_invocable_v<Task>) {
 #ifndef NODEBUG
-				m_tasks.pushBack([task = std::forward<Task>(task), this](size_t threadIndex) {
-					(void)threadIndex;
-					auto threadId = std::this_thread::get_id();
-					{
-						std::lock_guard<std::mutex> lock(m_statesMutex);
-						m_threadStates[threadId].currentTask =
-							"Task started at " +
-							std::to_string(
-								std::chrono::system_clock::now()
-								.time_since_epoch()
-								.count()
-							);
-					}
-					task();
-					{
-						std::lock_guard<std::mutex> lock(m_statesMutex);
-						m_threadStates[threadId].currentTask = "idle";
-					}
-					});
-#else
-				m_tasks.pushBack([task = std::forward<Task>(task), this](size_t threadIndex) {
-					(void)threadIndex;
-					task();
-					});
-#endif
-			}
-			else if constexpr (std::is_invocable_v<Task, size_t>) {
-#ifndef NODEBUG
-				m_tasks.pushBack([task = std::forward<Task>(task), this](size_t threadIndex) {
-					auto threadId = std::this_thread::get_id();
-					{
-						std::lock_guard<std::mutex> lock(m_statesMutex);
-						m_threadStates[threadId].currentTask =
-							"Task started at " +
-							std::to_string(
-								std::chrono::system_clock::now()
-								.time_since_epoch()
-								.count()
-							);
-					}
-					task(threadIndex);
-					{
-						std::lock_guard<std::mutex> lock(m_statesMutex);
-						m_threadStates[threadId].currentTask = "idle";
-					}
-					});
-#else
-				m_tasks.pushBack(std::forward<Task>(task));
-#endif
-			}
-			else {
-				static_assert(
-					std::is_invocable_v<Task> || std::is_invocable_v<Task, size_t>,
-					"Task must be callable as either void() or void(size_t)"
-					);
-			}
-		}
+		enum class ThreadState {
+			Waiting,
+			Working,
+			Inactive,
+			CatchingError,
+		};
 
-		template<typename Task>
-		void pushPriorityTask(std::function<void()> task, [[maybe_unused]] std::unique_lock<std::mutex>& accessLock)
-		{
-			if constexpr (std::is_invocable_v<Task>) {
-#ifndef NODEBUG
-				m_tasks.pushFront([task = std::forward<Task>(task), this](size_t threadIndex) {
-					(void)threadIndex;
-					auto threadId = std::this_thread::get_id();
-					{
-						std::lock_guard<std::mutex> lock(m_statesMutex);
-						m_threadStates[threadId].currentTask =
-							"Task started at " +
-							std::to_string(
-								std::chrono::system_clock::now()
-								.time_since_epoch()
-								.count()
-							);
-					}
-					task();
-					{
-						std::lock_guard<std::mutex> lock(m_statesMutex);
-						m_threadStates[threadId].currentTask = "idle";
-					}
-					});
-#else
-				m_tasks.pushFront([task = std::forward<Task>(task), this](size_t threadIndex) {
-					(void)threadIndex;
-					task();
-					});
+		struct ErrorInfo {
+			std::string what;
+			std::chrono::steady_clock::time_point timestamp;
+		};
+
+		struct ThreadInfo {
+			std::thread::id id;
+			ThreadState state;
+			uintptr_t waitingOn;  // Track locked mutex address
+			std::vector<ErrorInfo> errors;
+		};
+
+		std::vector<ThreadInfo> m_threadStates;
+		std::vector<std::unique_ptr<std::shared_mutex>> m_stateMutexes;
 #endif
-			}
-			else if constexpr (std::is_invocable_v<Task, size_t>) {
-#ifndef NODEBUG
-				m_tasks.pushFront([task = std::forward<Task>(task), this](size_t threadIndex) {
-					auto threadId = std::this_thread::get_id();
-					{
-						std::lock_guard<std::mutex> lock(m_statesMutex);
-						m_threadStates[threadId].currentTask =
-							"Task started at " +
-							std::to_string(
-								std::chrono::system_clock::now()
-								.time_since_epoch()
-								.count()
-							);
-					}
-					task(threadIndex);
-					{
-						std::lock_guard<std::mutex> lock(m_statesMutex);
-						m_threadStates[threadId].currentTask = "idle";
-					}
-					});
-#else
-				m_tasks.pushFront(std::forward<Task>(task));
-#endif
-			}
-			else {
-				static_assert(
-					std::is_invocable_v<Task> || std::is_invocable_v<Task, size_t>,
-					"Task must be callable as either void() or void(size_t)"
-					);
-			}
-		}
 
 	public:
-		ThreadPool() = default;
-		~ThreadPool() { shutdown(); };
-
+		ThreadPool() noexcept = default;
 		ThreadPool(const ThreadPool&) = delete;
 		ThreadPool& operator=(const ThreadPool&) = delete;
 		ThreadPool(ThreadPool&&) = delete;
 		ThreadPool& operator=(ThreadPool&&) = delete;
 
-		void init(size_t numThreads);
-		void shutdown();
-		void terminate();
-
-		template<typename Task>
-		bool pushTask(Task&& task) {
-			if (!m_active.load())
-				return false;
-			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
-			pushTask(std::forward<Task>(task), lock);
-			return true;
-		};
-
-		// Vector of tasks with move semantics
-		template<typename Task>
-		bool pushTasks(std::vector<Task>&& tasks) {
-			if (!m_active.load())
-				return false;
-			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
-			for (auto& task : tasks)
-				pushTask(std::move(task), lock);
-			return true;
+		~ThreadPool() {
+			destroy();
 		}
 
-		// Const reference vector version
-		template<typename Task>
-		bool pushTasks(const std::vector<Task>& tasks) {
-			if (!m_active.load())
-				return false;
-			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
-			for (const auto& task : tasks)
-				pushTask(task, lock);
-			return true;
+		inline Lock init(size_t threadCount, std::ostream& errorStream) {
+			return init(threadCount, lock(), errorStream);
 		}
 
-		// implementation doesn't work, commented out for now
-		//// Iterator range version
-		//template<typename Iterator>
-		//bool pushTasks(Iterator begin, Iterator end) {
-		//	// Use std::decay_t to get the actual value type from the iterator
-		//	//using ValueType = typename std::decay_t<decltype(*std::declval<Iterator>())>;
+		Lock init(size_t threadCount, Lock&& lock, std::ostream& errorStream) {
+			lock = destroy(std::move(lock));
+			m_errorStream = &errorStream;
+			m_threads.resize(threadCount);
+			m_threadAmountToRun = threadCount;
+			m_activeThreadCount = 0;
+			m_workingThreadCount = 0;
 
-		//	//static_assert(std::is_convertible_v<
-		//	//	ValueType,
-		//	//	std::function<void()>
-		//	//>, "Iterator must point to compatible task type");
-
-		//	if (!m_active.load())
-		//		return false;
-		//	std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
-		//	for (auto it = begin; it != end; ++it) {
-		//		std::function<void()> task = *it; // Will fail to compile if not convertible
-		//		pushTask(std::move(task), lock);
-		//	}
-		//	return true;
-		//}
-
-		//// Variadic template for multiple individual tasks
-		//template<typename... Tasks>
-		//bool pushTasks(Tasks&&... tasks) {
-		//	if (!m_active.load())
-		//		return false;
-
-		//	//static_assert((std::is_convertible_v<
-		//	//	std::decay_t<Tasks>,
-		//	//	std::function<void()>
-		//	//> && ...), "All tasks must be convertible to std::function<void()>");
-
-		//	std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
-		//	(pushTask(std::function<void()>(std::forward<Tasks>(tasks)), lock), ...);
-		//	return true;
-		//}
-
-		template<typename Task>
-		bool pushPriorityTask(Task&& task) {
-			if (!m_active.load())
-				return false;
-			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
-			pushPriorityTask(std::forward<Task>(task), lock);
-			return true;
-		};
-
-		// Vector of tasks with move semantics
-		template<typename Task>
-		bool pushPriorityTasks(std::vector<Task>&& tasks) {
-			if (!m_active.load())
-				return false;
-			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
-			for (auto& task : tasks)
-				pushPriorityTask(std::move(task), lock);
-			return true;
+#ifndef NODEBUG
+			m_threadStates.resize(threadCount);
+			m_stateMutexes.resize(threadCount);
+#endif
+			for(size_t i = 0; i < m_threads.size(); ++i) {
+#ifndef NODEBUG
+				m_threadStates[i].id = m_threads[i].get_id();
+				m_threadStates[i].state = ThreadState::Inactive;
+				m_stateMutexes[i] = std::make_unique<std::shared_mutex>();
+#endif
+				m_threads[i] = std::thread([this, i](){ threadLoop(i); });
+			}
+			
+			return lock;
 		}
 
-		// Const reference vector version
-		template<typename Task>
-		bool pushPriorityTasks(const std::vector<Task>& tasks) {
-			if (!m_active.load())
-				return false;
-			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
-			for (const auto& task : tasks)
-				pushPriorityTask(task, lock);
-			return true;
+		inline Lock destroy() {
+			return destroy(lock());
 		}
 
-		void resize(size_t newSize);
+		Lock destroy(Lock&& lock) {
+			if(m_errorStream == nullptr) return std::move(lock);
+			m_threadAmountToRun = 0;
+			m_threadWakeUp.notify_all();
+			m_threadExited.wait(lock, [this](){ return m_activeThreadCount == 0; });
 
-		// waits for all tasks to finish and returns a lock that keeps the pool paused until released
-		std::unique_lock<std::mutex> pausePool() {
-			std::unique_lock<std::mutex> lock(m_taskSubmissionMutex);
-
-			m_poolFinished.wait(lock, [this]() {
-				return m_tasks.empty() && m_freeWorkers == m_workerThreads.size();
-				});
+			for(size_t i = 0; i < m_threads.size(); ++i) m_threads[i].join();
+			m_threads.clear();
+			m_errorStream = nullptr;
 
 			return lock;
 		}
 
-		size_t clearPendingTasks() {
-			std::lock_guard<std::mutex> lock(m_taskSubmissionMutex);
-			size_t cleared = 0;
-			std::function<void(size_t)> task;
-			while (m_tasks.popFront(task)) {
-				cleared++;
+		// Locks task submission
+		inline Lock lock() const {
+			Lock lock(m_taskMutex);
+			return lock;
+		}
+
+		// Locks task submission and waits until threads finish current tasks they are performing
+		inline Lock wait() {
+			return wait(lock());
+		}
+
+		// Wait until all tasks in the queue are complete
+		inline Lock waitIdle() {
+			return waitIdle(lock());
+		}
+
+		//flushes the task queue
+		inline Lock flush() {
+			return flush(lock());
+		}
+
+		// Locks task submission and waits until threads finish current tasks they are performing
+		inline Lock wait(Lock&& lock) {
+			m_taskFinished.wait(lock, [this](){ return m_workingThreadCount == 0; });
+			return lock;
+		}
+
+		// Wait until all tasks in the queue are complete
+		inline Lock waitIdle(Lock&& lock) {
+			m_taskFinished.wait(lock, [this](){ return m_tasks.empty() && m_workingThreadCount == 0; });
+			return lock;
+		}
+
+		//flushes the task queue
+		inline Lock flush(Lock&& lock) {
+			m_tasks.clear();
+			return lock;
+		}
+
+		template<typename Task>
+		inline Lock pushTask(Task&& task) {
+			return pushTask(std::forward<Task>(task), lock());
+		}
+
+		template<typename Task>
+		inline Lock pushTask(Task&& task, Lock&& lock) {
+			if constexpr (std::is_invocable_v<Task>) {
+				m_tasks.push_back([task = std::forward<Task>(task), this](size_t threadIndex) {
+					(void)threadIndex;
+					task();
+					});
+				m_threadWakeUp.notify_one();
 			}
-			return cleared;
-		}
-
-		unsigned int getFreeWorkers() { return m_freeWorkers.load(); };
-		unsigned int getWorkerAmount() {
-			std::lock_guard<std::mutex> lock(m_taskSubmissionMutex);
-			return m_workerThreads.size();
-		};
-
-		std::vector<std::thread::id> getWorkerIds();
-
-#ifndef NODEBUG
-		std::vector<std::string> getErrors() { return m_errors.getCopy(); };
-#endif
-		size_t getQueueSize() const { return m_tasks.size(); };
-		size_t getWorkerCount() const { return m_workerCount; };
-
-#ifndef NODEBUG
-		void logThreadState(const std::string& state, std::mutex* waitingMutex = nullptr) {
-			std::lock_guard<std::mutex> lock(m_statesMutex);
-			auto& info = m_threadStates[std::this_thread::get_id()];
-			info.lastActiveTime = std::chrono::steady_clock::now();
-			info.waitingOn = waitingMutex;
-		}
-
-		void checkForDeadlocks() {
-			std::lock_guard<std::mutex> lock(m_statesMutex);
-			// Check for threads waiting too long
-			auto now = std::chrono::steady_clock::now();
-			for (const auto& [id, info] : m_threadStates) {
-				auto waitTime = now - info.lastActiveTime;
-				if (waitTime > std::chrono::seconds(5) && info.currentTask != "idle" && info.currentTask != "") {  // Adjustable threshold
-					std::cerr << "Potential deadlock detected:\n"
-						<< "Thread " << id << " waiting for > 5s\n"
-						<< "Last known task: " << info.currentTask << "\n";
-				}
+			else if constexpr (std::is_invocable_v<Task, size_t>) {
+				m_tasks.push_back(std::forward<Task>(task));
+				m_threadWakeUp.notify_one();
 			}
+			else {
+				static_assert(
+					std::is_invocable_v<Task> || std::is_invocable_v<Task, size_t>,
+					"Task must be callable as either void() or void(size_t)"
+					);
+			}
+			return lock;
 		}
-#endif
+
+		template<typename Task>
+		inline Lock pushPriorityTask(Task&& task) {
+			return pushPriorityTask(std::forward<Task>(task), lock());
+		}
+
+		template<typename Task>
+		inline Lock pushPriorityTask(Task&& task, Lock&& lock) {
+			if constexpr (std::is_invocable_v<Task>) {
+				m_tasks.push_front([task = std::forward<Task>(task), this](size_t threadIndex) {
+					(void)threadIndex;
+					task();
+					});
+				m_threadWakeUp.notify_one();
+			}
+			else if constexpr (std::is_invocable_v<Task, size_t>) {
+				m_tasks.push_front(std::forward<Task>(task));
+				m_threadWakeUp.notify_one();
+			}
+			else {
+				static_assert(
+					std::is_invocable_v<Task> || std::is_invocable_v<Task, size_t>,
+					"Task must be callable as either void() or void(size_t)"
+					);
+			}
+			return lock;
+		}
+
+		template<typename TaskContainer>
+		inline Lock pushTasks(const TaskContainer& tasks) {		
+			return pushTasks(tasks, lock());
+		}
+
+		template<typename TaskContainer>
+		inline Lock pushTasks(const TaskContainer& tasks, Lock&& lock) {
+			for(size_t i = 0; i < tasks.size(); ++i) lock = pushTask(tasks[i], std::move(lock));			
+			return lock;
+		}
+
+		template<typename TaskContainer>
+		inline Lock pushPriorityTasks(const TaskContainer& tasks) {		
+			return pushPriorityTasks(tasks, lock());
+		}
+
+		template<typename TaskContainer>
+		inline Lock pushPriorityTasks(const TaskContainer& tasks, Lock&& lock) {
+			for(size_t i = 0; i < tasks.size(); ++i) lock = pushPriorityTask(tasks[i], std::move(lock));			
+			return lock;
+		}
+
+		inline Lock resize(size_t newSize) {
+			return resize(newSize, lock());
+		}
+
+		inline Lock grow(size_t newSize) {
+			return grow(newSize, lock());
+		}
+
+		inline Lock shrink(size_t newSize) {
+			return shrink(newSize, lock());
+		}
+
+		inline Lock resize(size_t newSize, Lock&& lock) {
+			if(newSize > m_threads.size()) return grow(newSize, std::move(lock));
+			else if(newSize < m_threads.size()) return shrink(newSize, std::move(lock));
+			return lock;
+		}
+
+		Lock grow(size_t newSize, Lock&& lock) {
+			size_t oldSize = m_threads.size();
+			m_threads.resize(newSize);
+			m_threadAmountToRun = newSize;
+			for(size_t i = oldSize; i < m_threads.size(); ++i) m_threads[i] = std::thread([this, i](){ threadLoop(i); });
+			return lock;
+		}
+
+		Lock shrink(size_t newSize, Lock&& lock) {
+			m_threadAmountToRun = newSize;
+			m_threadWakeUp.notify_all();
+			m_threadExited.wait(lock, [&](){ return m_activeThreadCount == newSize; });
+			for(size_t i = newSize; i < m_threads.size(); ++i) m_threads[i].join();
+			m_threads.resize(newSize);
+			return lock;
+		}
+
+		inline size_t getActiveThreadCount() const {			
+			auto lock = this->lock();
+			return m_activeThreadCount;
+		}
+
+		inline size_t getWorkingThreadCount() const {			
+			auto lock = this->lock();
+			return m_workingThreadCount;
+		}
+
+		inline size_t getThreadCount() const {
+			auto lock = this->lock();
+			return m_workingThreadCount;
+		}
 
 	private:
-		void pushTask(std::function<void()> task, std::unique_lock<std::mutex>& accessLock);
-		void pushPriorityTask(std::function<void()> task, std::unique_lock<std::mutex>& accessLock);
+
+		void threadLoop(size_t threadIndex) {
+			auto lock = this->lock();
+#ifndef NODEBUG
+			auto& threadInfo = m_threadStates[threadIndex];
+			auto& threadInfoMutex = *m_stateMutexes[threadIndex];
+			threadInfoMutex.lock();
+			threadInfo.waitingOn = reinterpret_cast<uintptr_t>(&m_taskMutex);
+			threadInfo.state = ThreadState::Inactive;
+			threadInfoMutex.unlock();
+#endif
+			++m_activeThreadCount;
+			while(true) {
+#ifndef NODEBUG
+				threadInfoMutex.lock();
+				threadInfo.state = ThreadState::Waiting;
+				threadInfoMutex.unlock();
+#endif
+				m_threadWakeUp.wait(lock, [&](){ return !m_tasks.empty() || m_threadAmountToRun <= threadIndex; });
+				if(m_threadAmountToRun <= threadIndex) break;
+				std::function task = m_tasks.front();
+				m_tasks.pop_front();
+				++m_workingThreadCount;
+				lock.unlock();
+#ifndef NODEBUG
+				threadInfoMutex.lock();
+				threadInfo.state = ThreadState::Working;
+				threadInfo.waitingOn = 0;
+				threadInfoMutex.unlock();
+#endif
+				try {
+					task(threadIndex);
+					lock.lock();
+#ifndef NODEBUG
+					threadInfoMutex.lock();
+					threadInfo.waitingOn = reinterpret_cast<uintptr_t>(&m_taskMutex);
+					threadInfoMutex.unlock();
+#endif
+				} catch(const std::exception& e) {
+					lock.lock();
+#ifndef NODEBUG
+					threadInfoMutex.lock();
+					threadInfo.state = ThreadState::CatchingError;
+					threadInfo.waitingOn = reinterpret_cast<uintptr_t>(&m_taskMutex);
+					threadInfo.errors.push_back(ErrorInfo{.what = e.what(), .timestamp = std::chrono::steady_clock::now()});
+					threadInfoMutex.unlock();
+#endif
+					*m_errorStream << e.what() << std::endl;
+				}
+				--m_workingThreadCount;
+				m_taskFinished.notify_all();
+			}
+			--m_activeThreadCount;
+#ifndef NODEBUG
+			threadInfoMutex.lock();
+			threadInfo.state = ThreadState::Inactive;
+			threadInfoMutex.unlock();
+#endif
+			m_threadExited.notify_all();
+		}
 	};
 }
 

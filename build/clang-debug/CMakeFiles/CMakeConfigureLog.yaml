@@ -39,8 +39,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-tshjuz"
-      binary: "E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-tshjuz"
+      source: "E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-vm05sm"
+      binary: "E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-vm05sm"
     cmakeVariables:
       CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "C:/Users/user/.utils/llvm-mingw/bin/clang-scan-deps.exe"
       CMAKE_CXX_FLAGS: ""
@@ -51,43 +51,35 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: 'E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-tshjuz'
+        Change Dir: 'E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-vm05sm'
         
-        Run Build Command(s): "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/bin/cmake.exe" -E env VERBOSE=1 A:/compilers/mingw64/bin/mingw32-make.exe -f Makefile cmTC_8503a/fast
-        A:/compilers/mingw64/bin/mingw32-make.exe  -f CMakeFiles\\cmTC_8503a.dir\\build.make CMakeFiles/cmTC_8503a.dir/build
-        mingw32-make[1]: Entering directory 'E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-tshjuz'
-        Building CXX object CMakeFiles/cmTC_8503a.dir/CMakeCXXCompilerABI.cpp.obj
-        C:\\Users\\user\\.utils\\llvm-mingw\\bin\\clang++.exe   -v -MD -MT CMakeFiles/cmTC_8503a.dir/CMakeCXXCompilerABI.cpp.obj -MF CMakeFiles\\cmTC_8503a.dir\\CMakeCXXCompilerABI.cpp.obj.d -o CMakeFiles\\cmTC_8503a.dir\\CMakeCXXCompilerABI.cpp.obj -c "E:\\Program Files (x86)\\CMake\\cmake-3.30.2-windows-x86_64\\share\\cmake-3.30\\Modules\\CMakeCXXCompilerABI.cpp"
+        Run Build Command(s): "E:/Program Files (x86)/meson/ninja.EXE" -v cmTC_1e07c
+        [1/2] C:\\Users\\user\\.utils\\llvm-mingw\\bin\\clang++.exe   -v -MD -MT CMakeFiles/cmTC_1e07c.dir/CMakeCXXCompilerABI.cpp.obj -MF CMakeFiles\\cmTC_1e07c.dir\\CMakeCXXCompilerABI.cpp.obj.d -o CMakeFiles/cmTC_1e07c.dir/CMakeCXXCompilerABI.cpp.obj -c "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/share/cmake-3.30/Modules/CMakeCXXCompilerABI.cpp"
         clang version 22.1.0-rc3 (https://github.com/llvm/llvm-project.git 8530a2cf135c6091438b92b3778d1f23bf77d905)
         Target: x86_64-w64-windows-gnu
         Thread model: posix
         InstalledDir: C:/Users/user/.utils/llvm-mingw/bin
         Configuration file: C:/Users/user/.utils/llvm-mingw/bin/x86_64-w64-windows-gnu.cfg
          (in-process)
-         "C:/Users/user/.utils/llvm-mingw/bin/clang-22.exe" -cc1 -triple x86_64-w64-windows-gnu -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -mframe-pointer=none -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -fno-sized-deallocation -fno-use-init-array -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb "-fdebug-compilation-dir=E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-tshjuz" -v "-fcoverage-compilation-dir=E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-tshjuz" -resource-dir C:/Users/user/.utils/llvm-mingw/lib/clang/22 -dependency-file "CMakeFiles\\\\cmTC_8503a.dir\\\\CMakeCXXCompilerABI.cpp.obj.d" -MT CMakeFiles/cmTC_8503a.dir/CMakeCXXCompilerABI.cpp.obj -sys-header-deps -internal-isystem C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include/c++/v1 -internal-isystem C:/Users/user/.utils/llvm-mingw/include/c++/v1 -internal-isystem C:/Users/user/.utils/llvm-mingw/lib/clang/22/include -internal-isystem C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include -internal-isystem C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/usr/include -internal-isystem C:/Users/user/.utils/llvm-mingw/include -fdeprecated-macro -ferror-limit 19 -fno-use-cxa-atexit -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -exception-model=seh -faddrsig -o "CMakeFiles\\\\cmTC_8503a.dir\\\\CMakeCXXCompilerABI.cpp.obj" -x c++ "E:\\\\Program Files (x86)\\\\CMake\\\\cmake-3.30.2-windows-x86_64\\\\share\\\\cmake-3.30\\\\Modules\\\\CMakeCXXCompilerABI.cpp"
+         "C:/Users/user/.utils/llvm-mingw/bin/clang-22.exe" -cc1 -triple x86_64-w64-windows-gnu -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -mframe-pointer=none -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -fno-sized-deallocation -fno-use-init-array -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb "-fdebug-compilation-dir=E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-vm05sm" -v "-fcoverage-compilation-dir=E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-vm05sm" -resource-dir C:/Users/user/.utils/llvm-mingw/lib/clang/22 -dependency-file "CMakeFiles\\\\cmTC_1e07c.dir\\\\CMakeCXXCompilerABI.cpp.obj.d" -MT CMakeFiles/cmTC_1e07c.dir/CMakeCXXCompilerABI.cpp.obj -sys-header-deps -internal-isystem C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include/c++/v1 -internal-isystem C:/Users/user/.utils/llvm-mingw/include/c++/v1 -internal-isystem C:/Users/user/.utils/llvm-mingw/lib/clang/22/include -internal-isystem C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include -internal-isystem C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/usr/include -internal-isystem C:/Users/user/.utils/llvm-mingw/include -fdeprecated-macro -ferror-limit 19 -fno-use-cxa-atexit -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -exception-model=seh -faddrsig -o CMakeFiles/cmTC_1e07c.dir/CMakeCXXCompilerABI.cpp.obj -x c++ "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/share/cmake-3.30/Modules/CMakeCXXCompilerABI.cpp"
         clang -cc1 version 22.1.0-rc3 based upon LLVM 22.1.0-rc3 default target x86_64-w64-mingw32
-        ignoring nonexistent directory "C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include/c++/v1"
-        ignoring nonexistent directory "C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include"
-        ignoring nonexistent directory "C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/usr/include"
-        #include "..." search starts here:
-        #include <...> search starts here:
-         C:/Users/user/.utils/llvm-mingw/include/c++/v1
-         C:/Users/user/.utils/llvm-mingw/lib/clang/22/include
-         C:/Users/user/.utils/llvm-mingw/include
-        End of search list.
-        Linking CXX executable cmTC_8503a.exe
-        "E:\\Program Files (x86)\\CMake\\cmake-3.30.2-windows-x86_64\\bin\\cmake.exe" -E cmake_link_script CMakeFiles\\cmTC_8503a.dir\\link.txt --verbose=1
-        "E:\\Program Files (x86)\\CMake\\cmake-3.30.2-windows-x86_64\\bin\\cmake.exe" -E rm -f CMakeFiles\\cmTC_8503a.dir/objects.a
-        C:\\Users\\user\\.utils\\llvm-mingw\\bin\\llvm-ar.exe qc CMakeFiles\\cmTC_8503a.dir/objects.a @CMakeFiles\\cmTC_8503a.dir\\objects1.rsp
-        C:\\Users\\user\\.utils\\llvm-mingw\\bin\\clang++.exe  -v -Wl,-v -Wl,--whole-archive CMakeFiles\\cmTC_8503a.dir/objects.a -Wl,--no-whole-archive -o cmTC_8503a.exe -Wl,--out-implib,libcmTC_8503a.dll.a -Wl,--major-image-version,0,--minor-image-version,0
+        ignoring nonexistent directory "C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include/c++/v1"\x0d
+        ignoring nonexistent directory "C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include"\x0d
+        ignoring nonexistent directory "C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/usr/include"\x0d
+        #include "..." search starts here:\x0d
+        #include <...> search starts here:\x0d
+         C:/Users/user/.utils/llvm-mingw/include/c++/v1\x0d
+         C:/Users/user/.utils/llvm-mingw/lib/clang/22/include\x0d
+         C:/Users/user/.utils/llvm-mingw/include\x0d
+        End of search list.\x0d
+        [2/2] C:\\WINDOWS\\system32\\cmd.exe /C "cd . && C:\\Users\\user\\.utils\\llvm-mingw\\bin\\clang++.exe  -v -Wl,-v CMakeFiles/cmTC_1e07c.dir/CMakeCXXCompilerABI.cpp.obj -o cmTC_1e07c.exe -Wl,--out-implib,libcmTC_1e07c.dll.a -Wl,--major-image-version,0,--minor-image-version,0   && cd ."
         clang version 22.1.0-rc3 (https://github.com/llvm/llvm-project.git 8530a2cf135c6091438b92b3778d1f23bf77d905)
         Target: x86_64-w64-windows-gnu
         Thread model: posix
         InstalledDir: C:/Users/user/.utils/llvm-mingw/bin
         Configuration file: C:/Users/user/.utils/llvm-mingw/bin/x86_64-w64-windows-gnu.cfg
-         "C:/Users/user/.utils/llvm-mingw/bin/ld.lld" -m i386pep -Bdynamic -o cmTC_8503a.exe C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crt2.o C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crtbegin.o -LC:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib -LC:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/mingw/lib -LC:/Users/user/.utils/llvm-mingw/lib -LC:/Users/user/.utils/llvm-mingw/lib/clang/22/lib/windows -v --whole-archive "CMakeFiles\\\\cmTC_8503a.dir/objects.a" --no-whole-archive --out-implib libcmTC_8503a.dll.a --major-image-version 0 --minor-image-version 0 -lc++ -lmingw32 C:/Users/user/.utils/llvm-mingw/lib/clang/22/lib/windows/libclang_rt.builtins-x86_64.a -lunwind -lmoldname -lmingwex -lmsvcrt -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 C:/Users/user/.utils/llvm-mingw/lib/clang/22/lib/windows/libclang_rt.builtins-x86_64.a -lunwind -lmoldname -lmingwex -lmsvcrt -lkernel32 C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crtend.o
+         "C:/Users/user/.utils/llvm-mingw/bin/ld.lld" -m i386pep -Bdynamic -o cmTC_1e07c.exe C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crt2.o C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crtbegin.o -LC:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib -LC:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/mingw/lib -LC:/Users/user/.utils/llvm-mingw/lib -LC:/Users/user/.utils/llvm-mingw/lib/clang/22/lib/windows -v CMakeFiles/cmTC_1e07c.dir/CMakeCXXCompilerABI.cpp.obj --out-implib libcmTC_1e07c.dll.a --major-image-version 0 --minor-image-version 0 -lc++ -lmingw32 C:/Users/user/.utils/llvm-mingw/lib/clang/22/lib/windows/libclang_rt.builtins-x86_64.a -lunwind -lmoldname -lmingwex -lmsvcrt -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 C:/Users/user/.utils/llvm-mingw/lib/clang/22/lib/windows/libclang_rt.builtins-x86_64.a -lunwind -lmoldname -lmingwex -lmsvcrt -lkernel32 C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crtend.o
         LLD 22.1.0 (https://github.com/llvm/llvm-project.git 8530a2cf135c6091438b92b3778d1f23bf77d905) (compatible with GNU linkers)
-        mingw32-make[1]: Leaving directory 'E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-tshjuz'
         
       exitCode: 0
   -
@@ -120,47 +112,40 @@ events:
       Parsed CXX implicit link information:
         link line regex: [^( *|.*[/\\])(ld[0-9]*(\\.[a-z]+)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
         linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(\\.[a-z]+)?))("|,| |$)]
-        ignore line: [Change Dir: 'E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-tshjuz']
+        ignore line: [Change Dir: 'E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-vm05sm']
         ignore line: []
-        ignore line: [Run Build Command(s): "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/bin/cmake.exe" -E env VERBOSE=1 A:/compilers/mingw64/bin/mingw32-make.exe -f Makefile cmTC_8503a/fast]
-        ignore line: [A:/compilers/mingw64/bin/mingw32-make.exe  -f CMakeFiles\\cmTC_8503a.dir\\build.make CMakeFiles/cmTC_8503a.dir/build]
-        ignore line: [mingw32-make[1]: Entering directory 'E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-tshjuz']
-        ignore line: [Building CXX object CMakeFiles/cmTC_8503a.dir/CMakeCXXCompilerABI.cpp.obj]
-        ignore line: [C:\\Users\\user\\.utils\\llvm-mingw\\bin\\clang++.exe   -v -MD -MT CMakeFiles/cmTC_8503a.dir/CMakeCXXCompilerABI.cpp.obj -MF CMakeFiles\\cmTC_8503a.dir\\CMakeCXXCompilerABI.cpp.obj.d -o CMakeFiles\\cmTC_8503a.dir\\CMakeCXXCompilerABI.cpp.obj -c "E:\\Program Files (x86)\\CMake\\cmake-3.30.2-windows-x86_64\\share\\cmake-3.30\\Modules\\CMakeCXXCompilerABI.cpp"]
+        ignore line: [Run Build Command(s): "E:/Program Files (x86)/meson/ninja.EXE" -v cmTC_1e07c]
+        ignore line: [[1/2] C:\\Users\\user\\.utils\\llvm-mingw\\bin\\clang++.exe   -v -MD -MT CMakeFiles/cmTC_1e07c.dir/CMakeCXXCompilerABI.cpp.obj -MF CMakeFiles\\cmTC_1e07c.dir\\CMakeCXXCompilerABI.cpp.obj.d -o CMakeFiles/cmTC_1e07c.dir/CMakeCXXCompilerABI.cpp.obj -c "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/share/cmake-3.30/Modules/CMakeCXXCompilerABI.cpp"]
         ignore line: [clang version 22.1.0-rc3 (https://github.com/llvm/llvm-project.git 8530a2cf135c6091438b92b3778d1f23bf77d905)]
         ignore line: [Target: x86_64-w64-windows-gnu]
         ignore line: [Thread model: posix]
         ignore line: [InstalledDir: C:/Users/user/.utils/llvm-mingw/bin]
         ignore line: [Configuration file: C:/Users/user/.utils/llvm-mingw/bin/x86_64-w64-windows-gnu.cfg]
         ignore line: [ (in-process)]
-        ignore line: [ "C:/Users/user/.utils/llvm-mingw/bin/clang-22.exe" -cc1 -triple x86_64-w64-windows-gnu -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -mframe-pointer=none -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -fno-sized-deallocation -fno-use-init-array -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb "-fdebug-compilation-dir=E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-tshjuz" -v "-fcoverage-compilation-dir=E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-tshjuz" -resource-dir C:/Users/user/.utils/llvm-mingw/lib/clang/22 -dependency-file "CMakeFiles\\\\cmTC_8503a.dir\\\\CMakeCXXCompilerABI.cpp.obj.d" -MT CMakeFiles/cmTC_8503a.dir/CMakeCXXCompilerABI.cpp.obj -sys-header-deps -internal-isystem C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include/c++/v1 -internal-isystem C:/Users/user/.utils/llvm-mingw/include/c++/v1 -internal-isystem C:/Users/user/.utils/llvm-mingw/lib/clang/22/include -internal-isystem C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include -internal-isystem C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/usr/include -internal-isystem C:/Users/user/.utils/llvm-mingw/include -fdeprecated-macro -ferror-limit 19 -fno-use-cxa-atexit -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -exception-model=seh -faddrsig -o "CMakeFiles\\\\cmTC_8503a.dir\\\\CMakeCXXCompilerABI.cpp.obj" -x c++ "E:\\\\Program Files (x86)\\\\CMake\\\\cmake-3.30.2-windows-x86_64\\\\share\\\\cmake-3.30\\\\Modules\\\\CMakeCXXCompilerABI.cpp"]
+        ignore line: [ "C:/Users/user/.utils/llvm-mingw/bin/clang-22.exe" -cc1 -triple x86_64-w64-windows-gnu -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -mframe-pointer=none -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -fno-sized-deallocation -fno-use-init-array -target-cpu x86-64 -tune-cpu generic -debugger-tuning=gdb "-fdebug-compilation-dir=E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-vm05sm" -v "-fcoverage-compilation-dir=E:/Program Files (x86)/Code/C_code/libraries/CommonApi/build/clang-debug/CMakeFiles/CMakeScratch/TryCompile-vm05sm" -resource-dir C:/Users/user/.utils/llvm-mingw/lib/clang/22 -dependency-file "CMakeFiles\\\\cmTC_1e07c.dir\\\\CMakeCXXCompilerABI.cpp.obj.d" -MT CMakeFiles/cmTC_1e07c.dir/CMakeCXXCompilerABI.cpp.obj -sys-header-deps -internal-isystem C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include/c++/v1 -internal-isystem C:/Users/user/.utils/llvm-mingw/include/c++/v1 -internal-isystem C:/Users/user/.utils/llvm-mingw/lib/clang/22/include -internal-isystem C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include -internal-isystem C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/usr/include -internal-isystem C:/Users/user/.utils/llvm-mingw/include -fdeprecated-macro -ferror-limit 19 -fno-use-cxa-atexit -fgnuc-version=4.2.1 -fskip-odr-check-in-gmf -fcxx-exceptions -fexceptions -exception-model=seh -faddrsig -o CMakeFiles/cmTC_1e07c.dir/CMakeCXXCompilerABI.cpp.obj -x c++ "E:/Program Files (x86)/CMake/cmake-3.30.2-windows-x86_64/share/cmake-3.30/Modules/CMakeCXXCompilerABI.cpp"]
         ignore line: [clang -cc1 version 22.1.0-rc3 based upon LLVM 22.1.0-rc3 default target x86_64-w64-mingw32]
-        ignore line: [ignoring nonexistent directory "C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include/c++/v1"]
-        ignore line: [ignoring nonexistent directory "C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include"]
-        ignore line: [ignoring nonexistent directory "C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/usr/include"]
-        ignore line: [#include "..." search starts here:]
-        ignore line: [#include <...> search starts here:]
-        ignore line: [ C:/Users/user/.utils/llvm-mingw/include/c++/v1]
-        ignore line: [ C:/Users/user/.utils/llvm-mingw/lib/clang/22/include]
-        ignore line: [ C:/Users/user/.utils/llvm-mingw/include]
-        ignore line: [End of search list.]
-        ignore line: [Linking CXX executable cmTC_8503a.exe]
-        ignore line: ["E:\\Program Files (x86)\\CMake\\cmake-3.30.2-windows-x86_64\\bin\\cmake.exe" -E cmake_link_script CMakeFiles\\cmTC_8503a.dir\\link.txt --verbose=1]
-        ignore line: ["E:\\Program Files (x86)\\CMake\\cmake-3.30.2-windows-x86_64\\bin\\cmake.exe" -E rm -f CMakeFiles\\cmTC_8503a.dir/objects.a]
-        ignore line: [C:\\Users\\user\\.utils\\llvm-mingw\\bin\\llvm-ar.exe qc CMakeFiles\\cmTC_8503a.dir/objects.a @CMakeFiles\\cmTC_8503a.dir\\objects1.rsp]
-        ignore line: [C:\\Users\\user\\.utils\\llvm-mingw\\bin\\clang++.exe  -v -Wl -v -Wl --whole-archive CMakeFiles\\cmTC_8503a.dir/objects.a -Wl --no-whole-archive -o cmTC_8503a.exe -Wl --out-implib libcmTC_8503a.dll.a -Wl --major-image-version 0 --minor-image-version 0]
+        ignore line: [ignoring nonexistent directory "C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include/c++/v1"\x0d]
+        ignore line: [ignoring nonexistent directory "C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/include"\x0d]
+        ignore line: [ignoring nonexistent directory "C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/usr/include"\x0d]
+        ignore line: [#include "..." search starts here:\x0d]
+        ignore line: [#include <...> search starts here:\x0d]
+        ignore line: [ C:/Users/user/.utils/llvm-mingw/include/c++/v1\x0d]
+        ignore line: [ C:/Users/user/.utils/llvm-mingw/lib/clang/22/include\x0d]
+        ignore line: [ C:/Users/user/.utils/llvm-mingw/include\x0d]
+        ignore line: [End of search list.\x0d]
+        ignore line: [[2/2] C:\\WINDOWS\\system32\\cmd.exe /C "cd . && C:\\Users\\user\\.utils\\llvm-mingw\\bin\\clang++.exe  -v -Wl -v CMakeFiles/cmTC_1e07c.dir/CMakeCXXCompilerABI.cpp.obj -o cmTC_1e07c.exe -Wl --out-implib libcmTC_1e07c.dll.a -Wl --major-image-version 0 --minor-image-version 0   && cd ."]
         ignore line: [clang version 22.1.0-rc3 (https://github.com/llvm/llvm-project.git 8530a2cf135c6091438b92b3778d1f23bf77d905)]
         ignore line: [Target: x86_64-w64-windows-gnu]
         ignore line: [Thread model: posix]
         ignore line: [InstalledDir: C:/Users/user/.utils/llvm-mingw/bin]
         ignore line: [Configuration file: C:/Users/user/.utils/llvm-mingw/bin/x86_64-w64-windows-gnu.cfg]
-        link line: [ "C:/Users/user/.utils/llvm-mingw/bin/ld.lld" -m i386pep -Bdynamic -o cmTC_8503a.exe C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crt2.o C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crtbegin.o -LC:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib -LC:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/mingw/lib -LC:/Users/user/.utils/llvm-mingw/lib -LC:/Users/user/.utils/llvm-mingw/lib/clang/22/lib/windows -v --whole-archive "CMakeFiles\\\\cmTC_8503a.dir/objects.a" --no-whole-archive --out-implib libcmTC_8503a.dll.a --major-image-version 0 --minor-image-version 0 -lc++ -lmingw32 C:/Users/user/.utils/llvm-mingw/lib/clang/22/lib/windows/libclang_rt.builtins-x86_64.a -lunwind -lmoldname -lmingwex -lmsvcrt -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 C:/Users/user/.utils/llvm-mingw/lib/clang/22/lib/windows/libclang_rt.builtins-x86_64.a -lunwind -lmoldname -lmingwex -lmsvcrt -lkernel32 C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crtend.o]
+        link line: [ "C:/Users/user/.utils/llvm-mingw/bin/ld.lld" -m i386pep -Bdynamic -o cmTC_1e07c.exe C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crt2.o C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crtbegin.o -LC:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib -LC:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/mingw/lib -LC:/Users/user/.utils/llvm-mingw/lib -LC:/Users/user/.utils/llvm-mingw/lib/clang/22/lib/windows -v CMakeFiles/cmTC_1e07c.dir/CMakeCXXCompilerABI.cpp.obj --out-implib libcmTC_1e07c.dll.a --major-image-version 0 --minor-image-version 0 -lc++ -lmingw32 C:/Users/user/.utils/llvm-mingw/lib/clang/22/lib/windows/libclang_rt.builtins-x86_64.a -lunwind -lmoldname -lmingwex -lmsvcrt -ladvapi32 -lshell32 -luser32 -lkernel32 -lmingw32 C:/Users/user/.utils/llvm-mingw/lib/clang/22/lib/windows/libclang_rt.builtins-x86_64.a -lunwind -lmoldname -lmingwex -lmsvcrt -lkernel32 C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crtend.o]
           arg [C:/Users/user/.utils/llvm-mingw/bin/ld.lld] ==> ignore
           arg [-m] ==> ignore
           arg [i386pep] ==> ignore
           arg [-Bdynamic] ==> search dynamic
           arg [-o] ==> ignore
-          arg [cmTC_8503a.exe] ==> ignore
+          arg [cmTC_1e07c.exe] ==> ignore
           arg [C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crt2.o] ==> obj [C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crt2.o]
           arg [C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crtbegin.o] ==> obj [C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib/crtbegin.o]
           arg [-LC:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib] ==> dir [C:/Users/user/.utils/llvm-mingw/x86_64-w64-mingw32/lib]
@@ -168,11 +153,9 @@ events:
           arg [-LC:/Users/user/.utils/llvm-mingw/lib] ==> dir [C:/Users/user/.utils/llvm-mingw/lib]
           arg [-LC:/Users/user/.utils/llvm-mingw/lib/clang/22/lib/windows] ==> dir [C:/Users/user/.utils/llvm-mingw/lib/clang/22/lib/windows]
           arg [-v] ==> ignore
-          arg [--whole-archive] ==> ignore
-          arg [CMakeFiles\\\\cmTC_8503a.dir/objects.a] ==> ignore
-          arg [--no-whole-archive] ==> ignore
+          arg [CMakeFiles/cmTC_1e07c.dir/CMakeCXXCompilerABI.cpp.obj] ==> ignore
           arg [--out-implib] ==> ignore
-          arg [libcmTC_8503a.dll.a] ==> ignore
+          arg [libcmTC_1e07c.dll.a] ==> ignore
           arg [--major-image-version] ==> ignore
           arg [0] ==> ignore
           arg [--minor-image-version] ==> ignore
