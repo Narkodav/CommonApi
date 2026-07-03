@@ -8,6 +8,8 @@
 
 namespace MultiThreading
 {
+    thread_local Console::Buffer Console::m_threadBuffer;
+
 #ifdef _WIN32
     const std::array<Console::HandleType, static_cast<size_t>(Console::CallType::Num)> Console::s_handles = {
     GetStdHandle(STD_INPUT_HANDLE),

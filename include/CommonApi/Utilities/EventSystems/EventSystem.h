@@ -8,10 +8,9 @@
 #include <tuple>
 #include <utility>
 #include <memory>
-
+#include <algorithm>
+#include <exception>
 #include <cassert>
-
-
 
 namespace Utilities {
 
@@ -33,7 +32,6 @@ namespace Utilities {
 		template<Policy::Type T>
 		using SubscriptionInternal = std::pair<SubscriptionId, Subscriber<T>>;
 
-		template<Policy::Type T>
 		class Subscription
 		{
 			friend class EventSystem;
@@ -81,7 +79,7 @@ namespace Utilities {
 		SubscriptionId m_nextId = 0;
 
 		SubscriptionId getId() {
-			assert(m_nextId < std::numeric_limits<SubscriptionId>::max() && "ID wraparound - system has been running for 584 years");
+			assert(m_nextId != std::numeric_limits<SubscriptionId>::max() && "ID wraparound - system has been running for 584 years");
 			return m_nextId++;
 		}
 
@@ -97,7 +95,7 @@ namespace Utilities {
 		EventSystem& operator=(const EventSystem&) = delete;
 
 		template<Policy::Type T, typename CallbackT>
-		Subscription<T> subscribe(CallbackT&& callback)
+		Subscription subscribe(CallbackT&& callback)
 		{
 			auto id = getId();
 			SubscriptionInternal<T> internal = { id, std::forward<CallbackT>(callback) };
@@ -106,7 +104,7 @@ namespace Utilities {
 		}
 
 		template<Policy::Type T, typename Handler, typename CallbackT>
-		Subscription<T> subscribe(CallbackT&& callback, Handler& handler)
+		Subscription subscribe(CallbackT&& callback, Handler& handler)
 		{
 			Subscriber<T> wrappedSubscriber = [&handler, callbackInt = std::forward<CallbackT>(callback)](auto&&... args) {
 				(handler.*callbackInt)(std::forward<decltype(args)>(args)...);
@@ -137,7 +135,7 @@ namespace Utilities {
 		}
 
 		template<Policy::Type T>
-		EventSystem& unsubscribe(const Subscription<T>& id) {
+		EventSystem& unsubscribe(const Subscription& id) {
 			auto& subscribers = std::get<static_cast<size_t>(T)>(m_subscribers);
 			subscribers.erase(std::remove_if(subscribers.begin(), subscribers.end(), [&id](auto& subscriber) {
 				return subscriber.first == id;

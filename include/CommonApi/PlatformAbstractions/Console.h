@@ -106,7 +106,7 @@ namespace MultiThreading
 		static const std::array<HandleType, static_cast<size_t>(CallType::Num)> s_handles;
 
 		std::shared_mutex m_mutex;
-		static inline thread_local Buffer m_threadBuffer;
+		static thread_local Buffer m_threadBuffer;
 		std::vector<Buffer*> m_buffers;
 		std::priority_queue<Buffer::Records::Node, 
 		std::vector<Buffer::Records::Node>, Buffer::CompareNode> m_queue;

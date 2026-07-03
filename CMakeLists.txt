@@ -101,7 +101,7 @@ install(EXPORT CommonApiTargets
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/install/CommonApiConfig.cmake.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/CommonApiConfig.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/CommonApiConfig.cmake
     INSTALL_DESTINATION lib/cmake/CommonApi
 )

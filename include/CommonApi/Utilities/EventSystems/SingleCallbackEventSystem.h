@@ -7,6 +7,7 @@
 #include <array>
 #include <tuple>
 #include <utility>
+#include <exception>
 
 namespace Utilities {
 

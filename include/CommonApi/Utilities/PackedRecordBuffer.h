@@ -8,6 +8,7 @@
 #include <cstring>
 #include <span>
 #include <vector>
+#include <type_traits>
 
 namespace Utilities {
 

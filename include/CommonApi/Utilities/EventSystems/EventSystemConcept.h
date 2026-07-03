@@ -4,6 +4,7 @@
 #include <utility>
 #include <cstdint>
 #include <cstddef>
+#include <exception>
 
 //namespace Example
 //{

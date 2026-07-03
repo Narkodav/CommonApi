@@ -1,12 +1,12 @@
-# ninja log v5
-27	1985	7962078462629072	CMakeFiles/CommonApi.dir/src/CommonApi/Utilities/Functions.cpp.obj	8e7fa8100547c6f1
-3	2282	7962078465741283	CMakeFiles/CommonApi.dir/src/CommonApi/MultiThreading/FileSystem.cpp.obj	1a4c6beb3352e7ce
-7	2222	7962078464565653	CMakeFiles/CommonApi.dir/src/CommonApi/MultiThreading/Logger.cpp.obj	3fe113c0848f755f
-43	2711	7962378338587277	CMakeFiles/CommonApiTests.dir/tests/test.cpp.obj	964ed77dbda6cc5f
-18	1897	7962349407227269	CMakeFiles/CommonApi.dir/src/CommonApi/PlatformAbstractions/ErrorMapper.cpp.obj	3b2743db7afb5aa7
-10	2697	7962078469844186	CMakeFiles/CommonApi.dir/src/CommonApi/Physics/Hitboxes.cpp.obj	c1658895d34b8a31
-13	2225	7962350653719468	CMakeFiles/CommonApi.dir/src/CommonApi/PlatformAbstractions/Console.cpp.obj	cccf60ffdd7c94b8
-38	1876	7962378330184187	CMakeFiles/CommonApi.dir/src/CommonApi/PlatformAbstractions/Thread.cpp.obj	df5add653506b82d
-1876	2173	7962378332786377	libCommonApi.a	f1a156b7f85b0c65
-2712	3199	7962378343523744	CommonApiTests.exe	7182ed00423480ca
-3199	10268	0	CMakeFiles/install.util	be3543f796ac940d
+# ninja log v6
+30	2088	8048018125687820	CMakeFiles/CommonApi.dir/src/CommonApi/MultiThreading/Logger.cpp.obj	9701065c97f19632
+23	2230	8048018125598564	CMakeFiles/CommonApi.dir/src/CommonApi/MultiThreading/FileSystem.cpp.obj	c6d5f5c0cf77c1dc
+53	2252	8048018125950526	CMakeFiles/CommonApi.dir/src/CommonApi/PlatformAbstractions/ErrorMapper.cpp.obj	cff8eeb94162434c
+63	2387	8048018126022331	CMakeFiles/CommonApi.dir/src/CommonApi/PlatformAbstractions/Thread.cpp.obj	e8d82bd6f918bdc4
+44	2861	8048018125844841	CMakeFiles/CommonApi.dir/src/CommonApi/PlatformAbstractions/Console.cpp.obj	98c66178a2b3b376
+71	2884	8048018126120650	CMakeFiles/CommonApi.dir/src/CommonApi/Utilities/Functions.cpp.obj	f08ea81a3d7db314
+81	3201	8048018126193210	CMakeFiles/CommonApiTests.dir/tests/test.cpp.obj	92e6e46a674115ac
+37	3524	8048018125754799	CMakeFiles/CommonApi.dir/src/CommonApi/Physics/Hitboxes.cpp.obj	fc1ed051459252e0
+3527	3614	8048018160631714	libCommonApi.a	c3aea8140b5e7b07
+3616	3744	8048018161529204	CommonApiTests.exe	7182ed00423480ca
+3746	5638	8048018162816847	CMakeFiles/install.util	454ab03cc0888001

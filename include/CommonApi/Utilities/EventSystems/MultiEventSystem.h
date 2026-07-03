@@ -8,7 +8,7 @@
 #include <tuple>
 #include <utility>
 #include <memory>
-
+#include <exception>
 #include <cassert>
 
 namespace Utilities {
